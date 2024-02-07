@@ -131,14 +131,14 @@ public class Human : Player
         HorizontalWinStrategy horizontalWinStrategy = new HorizontalWinStrategy();
         DiagonalWinStrategy diagonalWinStrategy = new DiagonalWinStrategy();
         
-        // if(verticalWinStrategy.IsWinningMove(_gridService, index, _gameCurator.ActivePlayer.PlayerId))
-        //     return;
+        if(verticalWinStrategy.IsWinningMove(_gridService, index, _gameCurator.ActivePlayer.PlayerId))
+            return;
         
         if(horizontalWinStrategy.IsWinningMove(_gridService, index, _gameCurator.ActivePlayer.PlayerId))
             return;
         
-        // if(diagonalWinStrategy.IsWinningMove(_gridService, index, _gameCurator.ActivePlayer.PlayerId)) 
-        //     return;
+        if(diagonalWinStrategy.IsWinningMove(_gridService, index, _gameCurator.ActivePlayer.PlayerId)) 
+            return;
 
         _gameCurator.EndTurnHuman();
     }
