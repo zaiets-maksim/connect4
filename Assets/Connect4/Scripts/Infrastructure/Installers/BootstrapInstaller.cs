@@ -1,3 +1,4 @@
+using Infrastructure.Services.Factories.Game;
 using Infrastructure.Services.Factories.UIFactory;
 using Infrastructure.Services.PersistenceProgress;
 using Infrastructure.Services.StaticData;
@@ -35,10 +36,14 @@ namespace Infrastructure.Installers
         private void BindServices()
         {
             BindStaticDataService();
-            Container.Bind<IUIFactory>().To<UIFactory>().AsSingle();
-            Container.Bind<IWindowService>().To<WindowService>().AsSingle();
-            Container.Bind<IPersistenceProgressService>().To<PersistenceProgressService>().AsSingle(); 
-            Container.Bind<IFPSMeter>().To<FPSMeter>().AsSingle();
+            Container.BindInterfacesTo<UIFactory>().AsSingle();
+            Container.BindInterfacesTo<GameFactory>().AsSingle();
+            Container.BindInterfacesTo<WindowService>().AsSingle();
+            Container.BindInterfacesTo<PersistenceProgressService>().AsSingle(); 
+            Container.BindInterfacesTo<FPSMeter>().AsSingle();
+            Container.BindInterfacesTo<GridService>().AsSingle();
+            Container.BindInterfacesTo<GameCurator>().AsSingle();
+            Container.BindInterfacesTo<MoveVisualizer>().AsSingle();
         }
 
         private void BindMonoServices()
@@ -72,7 +77,6 @@ namespace Infrastructure.Installers
         {
             Container.Bind<BootstrapState>().AsSingle();
             Container.Bind<LoadProgressState>().AsSingle();
-            Container.Bind<BootstrapAnalyticState>().AsSingle();
             Container.Bind<LoadLevelState>().AsSingle();
             Container.Bind<GameLoopState>().AsSingle();
         }

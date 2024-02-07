@@ -17,7 +17,6 @@ namespace Infrastructure.StateMachine.Game
             {
                 [typeof(BootstrapState)] = container.Resolve<BootstrapState>,
                 [typeof(LoadProgressState)] = container.Resolve<LoadProgressState>,
-                [typeof(BootstrapAnalyticState)] = container.Resolve<BootstrapAnalyticState>,
                 [typeof(LoadLevelState)] = container.Resolve<LoadLevelState>,
                 [typeof(GameLoopState)] = container.Resolve<GameLoopState>,
                 

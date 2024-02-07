@@ -26,7 +26,7 @@ namespace Infrastructure.StateMachine.Game.States
 
         public void Exit()
         {
-
+            
         }
 
         private void OnLevelLoad() => 

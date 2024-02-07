@@ -23,6 +23,8 @@ namespace Infrastructure.StateMachine.Game.States
         public void Enter(string payload)
         {
             LoadOrCreatePlayerData();
+            _stateMachine.Enter<LoadLevelState, string>(payload);
+
         }
 
         public void Exit()
@@ -32,33 +34,6 @@ namespace Infrastructure.StateMachine.Game.States
 
         private PlayerData LoadOrCreatePlayerData() => 
             _progressService.PlayerData = new PlayerData();
-    }
-    
-    public class BootstrapAnalyticState : IPayloadedState<string>, IGameState
-    {
-        private readonly IStateMachine<IGameState> _stateMachine;
-        private readonly ISceneLoader _sceneLoader;
-        private readonly IFPSMeter _fpsMeter;
-
-        public BootstrapAnalyticState(IStateMachine<IGameState> stateMachine,
-         ISceneLoader sceneLoader, IFPSMeter fpsMeter)
-        {
-            _stateMachine = stateMachine;
-            _sceneLoader = sceneLoader;
-            _fpsMeter = fpsMeter;
-        }
-
-        public void Enter(string payload)
-        {
-            _fpsMeter.Begin();
-
-            _stateMachine.Enter<LoadLevelState, string>(payload);
-        }
-
-        public void Exit()
-        {
-            
-        }
     }
 
     public interface IFPSMeter
