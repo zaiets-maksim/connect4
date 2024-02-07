@@ -1,5 +1,6 @@
 using System.Threading.Tasks;
 using Connect4.Scripts.IWinningStrategy;
+using Connect4.Scripts.Services.VictoryCheckerService;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -8,11 +9,13 @@ public class GameCurator : IGameCurator
     private Player _player1, _player2;
     private IMoveVisualizer _moveVisualizer;
     private IGridService _gridService;
+    private IVictoryCheckerService _victoryCheckerService;
 
     public Player ActivePlayer { get; private set; }
 
-    public void Initialize(IMoveVisualizer moveVisualizer, IGridService gridService)
+    public void Initialize(IMoveVisualizer moveVisualizer, IGridService gridService, IVictoryCheckerService victoryCheckerService)
     {
+        _victoryCheckerService = victoryCheckerService;
         _gridService = gridService;
         _moveVisualizer = moveVisualizer;
     }
@@ -44,8 +47,8 @@ public class GameCurator : IGameCurator
         if (Random.value > 0.5f)
             (color1, color2) = (color2, color1);
 
-        _player1.Initialize(this, _moveVisualizer, _gridService, PlayerId.Player1, color1);
-        _player2.Initialize(this, _moveVisualizer, _gridService, PlayerId.Player2, color2);
+        _player1.Initialize(this, _moveVisualizer, _gridService, _victoryCheckerService, PlayerId.Player1, color1);
+        _player2.Initialize(this, _moveVisualizer, _gridService, _victoryCheckerService, PlayerId.Player2, color2);
         
         SetActivePlayer(Random.value > 0.5f ? _player1 : _player2);
     }
@@ -83,7 +86,7 @@ public interface IGameCurator
     void EndTurnComputer();
     void WaitForHumanTurn();
     void WaitForComputerTurn();
-    void Initialize(IMoveVisualizer moveVisualizer, IGridService gridService);
+    void Initialize(IMoveVisualizer moveVisualizer, IGridService gridService, IVictoryCheckerService victoryCheckerService);
 }
 
 public abstract class Player
@@ -91,15 +94,18 @@ public abstract class Player
     protected IGameCurator _gameCurator;
     protected IMoveVisualizer _moveVisualizer;
     protected IGridService _gridService;
+    protected IVictoryCheckerService _victoryCheckerService;
+    
     public Color Color { get; private set; }
     public PlayerId PlayerId { get; private set; }
     public bool IsReady { get; set; }
 
     public void Initialize(IGameCurator gameCurator, IMoveVisualizer moveVisualizer, IGridService gridService,
-        PlayerId playerId, Color color)
+        IVictoryCheckerService victoryCheckerService, PlayerId playerId, Color color)
     {
         Color = color;
         PlayerId = playerId;
+        _victoryCheckerService = victoryCheckerService;
         _gridService = gridService;
         _moveVisualizer = moveVisualizer;
         _gameCurator = gameCurator;
@@ -127,17 +133,7 @@ public class Human : Player
         
         Debug.Log($"{_gameCurator.ActivePlayer.PlayerId} made a move");
         
-        VerticalWinStrategy verticalWinStrategy = new VerticalWinStrategy();
-        HorizontalWinStrategy horizontalWinStrategy = new HorizontalWinStrategy();
-        DiagonalWinStrategy diagonalWinStrategy = new DiagonalWinStrategy();
-        
-        if(verticalWinStrategy.IsWinningMove(_gridService, index, _gameCurator.ActivePlayer.PlayerId))
-            return;
-        
-        if(horizontalWinStrategy.IsWinningMove(_gridService, index, _gameCurator.ActivePlayer.PlayerId))
-            return;
-        
-        if(diagonalWinStrategy.IsWinningMove(_gridService, index, _gameCurator.ActivePlayer.PlayerId)) 
+        if(_victoryCheckerService.TurnWasWin(index, _gameCurator.ActivePlayer.PlayerId))
             return;
 
         _gameCurator.EndTurnHuman();

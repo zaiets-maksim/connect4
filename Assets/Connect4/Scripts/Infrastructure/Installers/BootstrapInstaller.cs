@@ -1,3 +1,4 @@
+using Connect4.Scripts.Services.VictoryCheckerService;
 using Infrastructure.Services.Factories.Game;
 using Infrastructure.Services.Factories.UIFactory;
 using Infrastructure.Services.PersistenceProgress;
@@ -44,6 +45,7 @@ namespace Infrastructure.Installers
             Container.BindInterfacesTo<GridService>().AsSingle();
             Container.BindInterfacesTo<GameCurator>().AsSingle();
             Container.BindInterfacesTo<MoveVisualizer>().AsSingle();
+            Container.BindInterfacesTo<VictoryCheckerService>().AsSingle();
         }
 
         private void BindMonoServices()

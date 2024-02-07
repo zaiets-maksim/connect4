@@ -1,4 +1,5 @@
-﻿using Infrastructure.Services.Factories.Game;
+﻿using Connect4.Scripts.Services.VictoryCheckerService;
+using Infrastructure.Services.Factories.Game;
 using Infrastructure.Services.Factories.UIFactory;
 using Zenject;
 
@@ -14,12 +15,14 @@ namespace Infrastructure.StateMachine.Game.States
         private IGameFactory _gameFactory;
         private IMoveVisualizer _moveVisualizer;
         private IGridService _gridService;
+        private IVictoryCheckerService _victoryCheckerService;
 
         [Inject]
         public LoadLevelState(IStateMachine<IGameState> gameStateMachine, ISceneLoader sceneLoader,
             ILoadingCurtain loadingCurtain, IUIFactory uiFactory, IGameFactory gameFactory, IGameCurator gameCurator,
-            IMoveVisualizer moveVisualizer, IGridService gridService)
+            IMoveVisualizer moveVisualizer, IGridService gridService, IVictoryCheckerService victoryCheckerService)
         {
+            _victoryCheckerService = victoryCheckerService;
             _gridService = gridService;
             _moveVisualizer = moveVisualizer;
             _gameCurator = gameCurator;
@@ -52,7 +55,7 @@ namespace Infrastructure.StateMachine.Game.States
         {
            _uiFactory.CreateUiRoot();
            _gameFactory.CreateGrid();
-           _gameCurator.Initialize(_moveVisualizer, _gridService);
+           _gameCurator.Initialize(_moveVisualizer, _gridService, _victoryCheckerService);
            _gameCurator.SetPlayers<Player>(new Human(), new Human());
         }
     }
