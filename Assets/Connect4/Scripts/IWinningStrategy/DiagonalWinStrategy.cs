@@ -29,12 +29,12 @@ namespace Connect4.Scripts.IWinningStrategy
             {
                 rightDiagonal.StartIndex = GetRightDiagonalStartIndex(gridService, playerId, index.x, index.y);
                 rightDiagonal.CellsAhead = Mathf.Min(rightDiagonal.StartIndex.x, width - 1 - rightDiagonal.StartIndex.y);
-                
-                if (rightDiagonal.CellsAhead < 3)
-                    return false;
-                
-                rightDiagonal.Elements = GetRightDiagonal(rightDiagonal.StartIndex, gridService);
-                fourInRightDiagonal = FourInDiagonal(rightDiagonal.Elements, playerId);
+
+                if (rightDiagonal.CellsAhead >= 3)
+                {
+                    rightDiagonal.Elements = GetRightDiagonal(rightDiagonal.StartIndex, gridService);
+                    fourInRightDiagonal = FourInDiagonal(rightDiagonal.Elements, playerId);
+                }
             }
             
             if (leftDiagonal.CellsAhead + leftDiagonal.CellsBehind >= 3)
@@ -42,14 +42,15 @@ namespace Connect4.Scripts.IWinningStrategy
                 leftDiagonal.StartIndex = GetLeftDiagonalStartIndex(gridService, playerId, index.x, index.y);
                 leftDiagonal.CellsAhead = Mathf.Min(leftDiagonal.StartIndex.x, leftDiagonal.StartIndex.y);
 
-                if (leftDiagonal.CellsAhead < 3)
-                    return false;
-
-                leftDiagonal.Elements = GetLeftDiagonal(leftDiagonal.StartIndex, gridService);
-                fourInLeftDiagonal = FourInDiagonal(leftDiagonal.Elements, playerId);
+                if (leftDiagonal.CellsAhead >= 3)
+                {
+                    leftDiagonal.Elements = GetLeftDiagonal(leftDiagonal.StartIndex, gridService);
+                    fourInLeftDiagonal = FourInDiagonal(leftDiagonal.Elements, playerId);
+                }
             }
 
             var result = fourInRightDiagonal || fourInLeftDiagonal;
+
             if (result)
                 Debug.Log($"<color=green>{playerId} </color> win!");
 
@@ -65,7 +66,7 @@ namespace Connect4.Scripts.IWinningStrategy
         private Vector2Int GetDiagonalStartIndex(IGridService gridService, PlayerId playerId, int i, int j, int stepJ)
         {
             Vector2Int startIndex = new Vector2Int(i, j);
-            
+
             for (; IndexInOfRange(gridService, i, j); i++, j += stepJ)
             {
                 if (gridService.Grid[i][j].CellId != playerId)
@@ -96,10 +97,8 @@ namespace Connect4.Scripts.IWinningStrategy
         private bool FourInDiagonal(List<Cell> diagonal, PlayerId playerId)
         {
             for (var i = 0; i < 4; i++)
-            {
                 if (diagonal[i].CellId != playerId)
                     return false;
-            }
 
             return true;
         }
