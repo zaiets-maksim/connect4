@@ -1,31 +1,34 @@
 using System.Threading.Tasks;
+using Infrastructure.Services.Factories.Game;
 using UnityEngine;
 
 public class MoveVisualizer : IMoveVisualizer
 {
-    private const string PiecePath = "Prefabs/Piece";
-    
-    private readonly IGameCurator _gameCurator;
+    private readonly IGameFactory _gameFactory;
 
-
-    public MoveVisualizer(IGameCurator gameCurator)
+    public MoveVisualizer(IGameFactory gameFactory)
     {
-        _gameCurator = gameCurator;
+        _gameFactory = gameFactory;
     }
-    
-    public async Task ShowTurn(Vector2 position)
-    {
-        var prefab = Resources.Load<Piece>(PiecePath);
-        var piece = Object.Instantiate(prefab);
-        piece.transform.position = new Vector2(position.x, 5f);
-        piece.GetComponent<SpriteRenderer>().color = _gameCurator.ActivePlayer.Color;
 
+    public async Task ShowTurn(Vector2 position, Color color)
+    {
+        var piece = _gameFactory.CreatePiece(new Vector2(position.x, 5f), color);
         var task = piece.MoveTo(position, 0.25f);
         await task;
     }
+
+    // public async Task CancelTurn(MoveCommand command)
+    // {
+    //     var piece = command.Piece;
+    //     await piece.MoveTo(new Vector2(piece.transform.position.x, 5f), 0.25f);
+    //     piece.gameObject.SetActive(false);
+    // }
 }
 
 public interface IMoveVisualizer
 {
-    Task ShowTurn(Vector2 position);
+    Task ShowTurn(Vector2 position, Color color);
+    
+    // Task CancelTurn(MoveCommand command);
 }

@@ -8,12 +8,26 @@ namespace Infrastructure.Services.Factories.Game
         private const string GridCreatorPath = "Prefabs/Grid";
         private const string CellCreatorPath = "Prefabs/Cell";
         private const string ColumnCreatorPath = "Prefabs/Column";
+        private const string PiecePath = "Prefabs/Piece";
         
         private readonly IGameCurator _gameCurator;
+        private IGridService _gridService;
 
-        public GameFactory(IInstantiator instantiator, IGameCurator gameCurator) : base(instantiator)
+        public GameFactory(IInstantiator instantiator, IGameCurator gameCurator, IGridService gridService) : base(instantiator)
         {
+            _gridService = gridService;
             _gameCurator = gameCurator;
+        }
+        
+        public Piece CreatePiece(Vector2 position, Color color)
+        {
+            var prefab = InstantiateOnActiveScene(PiecePath);
+
+            prefab.transform.position = position;
+            var piece = prefab.GetComponent<Piece>();
+            piece.SetColor(color);
+
+            return piece;
         }
         
         public Cell CreateCell(int x, int y, float offsetX, float offsetY, float scale, Transform parent)
@@ -38,8 +52,8 @@ namespace Infrastructure.Services.Factories.Game
             obj.transform.localScale = new Vector3(0.92f, 1.095f * height, 0);
 
             var column = obj.GetComponent<Column>();
-            column.Initialize(_gameCurator);
-            column.InitIndexes(index, height);
+            column.Initialize(_gameCurator, index, height);
+            _gridService.Columns.Add(column);
         }
         
 

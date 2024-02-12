@@ -13,8 +13,7 @@ public class GridCreator : MonoBehaviour
     
     private IGridService _gridService;
     private IGameFactory _gameFactory;
-
-
+    
     [Inject]
     public void Constructor(IGridService gridService, IGameFactory gameFactory)
     {
@@ -22,7 +21,7 @@ public class GridCreator : MonoBehaviour
         _gridService = gridService;
     }
 
-    private void Start()
+    private void Awake()
     {
         Create(_width, _height);
     }
@@ -34,6 +33,16 @@ public class GridCreator : MonoBehaviour
 
         _grid = new Cell[height][];
 
+        CreateCells(width, height, offsetX, offsetY);
+        CreateColumns(width, height, offsetX, offsetY);
+        
+        _gridService.Initialization(_grid);
+        
+        AlignCamera(offsetX, offsetY);
+    }
+
+    private void CreateCells(int width, int height, float offsetX, float offsetY)
+    {
         for (var x = 0; x < height; x++)
         {
             _grid[x] = new Cell[width];
@@ -44,12 +53,6 @@ public class GridCreator : MonoBehaviour
                 _grid[x][y] = cell;
             }
         }
-
-        CreateColumns(width, height, offsetX, offsetY);
-        
-        _gridService.Initialization(_grid);
-        
-        AlignCamera(offsetX, offsetY);
     }
 
     private void CreateColumns(int width, int height, float offsetX, float offsetY)

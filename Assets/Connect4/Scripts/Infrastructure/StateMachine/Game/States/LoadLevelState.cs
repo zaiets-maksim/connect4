@@ -11,17 +11,22 @@ namespace Infrastructure.StateMachine.Game.States
         private readonly ILoadingCurtain _loadingCurtain;
         private readonly IUIFactory _uiFactory;
         private readonly IStateMachine<IGameState> _gameStateMachine;
-        private IGameCurator _gameCurator;
-        private IGameFactory _gameFactory;
-        private IMoveVisualizer _moveVisualizer;
-        private IGridService _gridService;
-        private IVictoryCheckerService _victoryCheckerService;
+        private readonly IGameCurator _gameCurator;
+        private readonly IGameFactory _gameFactory;
+        private readonly IMoveVisualizer _moveVisualizer;
+        private readonly IGridService _gridService;
+        private readonly IVictoryCheckerService _victoryCheckerService;
+        private readonly ITurnCalculationsService _turnCalculationsService;
+        private readonly ICommandHistoryService _commandHistoryService;
 
         [Inject]
         public LoadLevelState(IStateMachine<IGameState> gameStateMachine, ISceneLoader sceneLoader,
             ILoadingCurtain loadingCurtain, IUIFactory uiFactory, IGameFactory gameFactory, IGameCurator gameCurator,
-            IMoveVisualizer moveVisualizer, IGridService gridService, IVictoryCheckerService victoryCheckerService)
+            IMoveVisualizer moveVisualizer, IGridService gridService, IVictoryCheckerService victoryCheckerService,
+            ITurnCalculationsService turnCalculationsService, ICommandHistoryService commandHistoryService)
         {
+            _commandHistoryService = commandHistoryService;
+            _turnCalculationsService = turnCalculationsService;
             _victoryCheckerService = victoryCheckerService;
             _gridService = gridService;
             _moveVisualizer = moveVisualizer;
@@ -55,8 +60,8 @@ namespace Infrastructure.StateMachine.Game.States
         {
            _uiFactory.CreateUiRoot();
            _gameFactory.CreateGrid();
-           _gameCurator.Initialize(_moveVisualizer, _gridService, _victoryCheckerService);
-           _gameCurator.SetPlayers<Player>(new Human(), new Human());
+           _gameCurator.Initialize(_moveVisualizer, _gridService, _victoryCheckerService, _turnCalculationsService, _commandHistoryService);
+           _gameCurator.SetPlayers<Player>(new Human(), new Computer());
         }
     }
 }

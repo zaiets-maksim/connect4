@@ -46,6 +46,8 @@ namespace Infrastructure.Installers
             Container.BindInterfacesTo<GameCurator>().AsSingle();
             Container.BindInterfacesTo<MoveVisualizer>().AsSingle();
             Container.BindInterfacesTo<VictoryCheckerService>().AsSingle();
+            Container.BindInterfacesTo<TurnCalculationsService>().AsSingle();
+            Container.BindInterfacesTo<CommandHistoryService>().AsSingle();
         }
 
         private void BindMonoServices()
