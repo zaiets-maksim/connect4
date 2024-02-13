@@ -25,7 +25,8 @@ public class GridService : IGridService
     }
     
     public Cell GetCell(int x, int y) => Grid[x][y];
-    public void SetCell(int x, int y, Cell cell) => Grid[x][y] = cell;
+    public Cell GetCell(Vector2Int index) => Grid[index.x][index.y];
+    
     public void TakeCell(int x, int y, PlayerId state) => Grid[x][y].Take(state);
     public void ReleaseCell(int x, int y) => Grid[x][y].Release();
     public void Initialization(Cell[][] grid) => Grid = grid;
@@ -35,6 +36,7 @@ public class GridService : IGridService
 
     public bool RawHasFreeCell(Cell[] raw) => raw.Any(cell => cell.CellId == PlayerId.Empty);
     public bool GridHasFreeCell() => Columns.Any(x => x.HasFreeCell);
+    public Cell[][] CloneGrid() => Grid.Clone() as Cell[][];
 }
 
 public interface IGridService
@@ -50,7 +52,7 @@ public interface IGridService
     void Initialization(Cell[][] grid);
     
     Cell GetCell(int x, int y);
-    void SetCell(int x, int y, Cell cell);
+    Cell GetCell(Vector2Int index);
     
     void TakeCell(int x, int y, PlayerId state);
     void ReleaseCell(int x, int y);
@@ -58,4 +60,5 @@ public interface IGridService
     bool HasEmptyUnder(Cell cell, int count = 1);
     bool RawHasFreeCell(Cell[] raw);
     bool GridHasFreeCell();
+    Cell[][] CloneGrid();
 }

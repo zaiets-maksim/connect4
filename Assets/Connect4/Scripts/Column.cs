@@ -11,7 +11,13 @@ public class Column : MonoBehaviour
     public int LastElementIndex
     {
         get => _lastElementIndex;
-        private set => _lastElementIndex = _lastElementIndex > 0 ? value : _lastElementIndex;
+        private set
+        {
+            if(value < 0)
+                _lastElementIndex = _lastElementIndex > 0 ? value : _lastElementIndex;
+            else
+                _lastElementIndex = value;
+        }
     }
 
     public bool HasFreeCell => LastElementIndex > 0;
@@ -34,10 +40,14 @@ public class Column : MonoBehaviour
 
     private async void DoTurn()
     {
-        UpdateLastElementIndex();
+        AddLastElementIndex();
         _gameCurator.ActivePlayer.DoTurn(new Vector2Int(LastElementIndex, _index));
+        Debug.Log(new Vector2Int(LastElementIndex, _index));
     }
 
-    public void UpdateLastElementIndex() => 
+    public void AddLastElementIndex() => 
         --LastElementIndex;
+    
+    public void RemoveLastElementIndex() => 
+        ++LastElementIndex;
 }

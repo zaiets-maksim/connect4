@@ -14,10 +14,10 @@ namespace Connect4.Scripts.Services.VictoryCheckerService
         public VictoryCheckerService(IGridService gridService) =>
             _gridService = gridService;
 
-        public bool TurnIsWin(Vector2Int index, PlayerId playerId) => false;
-        // _verticalWinStrategy.IsWinningMove(_gridService, index, playerId);
-        // _horizontalWinStrategy.IsWinningMove(_gridService, index, playerId);
-        // _diagonalWinStrategy.IsWinningMove(_gridService, index, playerId);
+        public bool TurnIsWin(Vector2Int index, PlayerId playerId) =>
+        _verticalWinStrategy.IsWinningMove(_gridService, index, playerId) ||
+        _horizontalWinStrategy.IsWinningMove(_gridService, index, playerId) ||
+        _diagonalWinStrategy.IsWinningMove(_gridService, index, playerId);
 
         public bool TurnIsWin(Vector2Int index, PlayerId playerId, out int counter)
         {

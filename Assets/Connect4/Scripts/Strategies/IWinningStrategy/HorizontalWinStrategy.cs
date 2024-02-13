@@ -16,8 +16,8 @@ namespace Connect4.Scripts.IWinningStrategy
                 return false;
 
             var result = FourInRaw(row, startIndex, playerId);
-            if (result) 
-                Debug.Log($"<color=green>{playerId} </color> win!");
+            // if (result) 
+            //     Debug.Log($"<color=green>{playerId} </color> win!");
 
             return result;
         }
@@ -39,9 +39,13 @@ namespace Connect4.Scripts.IWinningStrategy
 
         private bool FourInRaw(Cell[] row, Vector2Int index, PlayerId playerId)
         {
+            // Debug.Log("\n");
             for (var y = index.y; y < index.y + 4; y++)
+            {
+                // Debug.Log($"index: {row[y].Index} id: {row[y].CellId}");
                 if (row[y].CellId != playerId)
                     return false;
+            }
 
             return true;
         }

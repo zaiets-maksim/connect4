@@ -51,8 +51,8 @@ namespace Connect4.Scripts.IWinningStrategy
 
             var result = fourInRightDiagonal || fourInLeftDiagonal;
 
-            if (result)
-                Debug.Log($"<color=green>{playerId} </color> win!");
+            // if (result)
+            //     Debug.Log($"<color=green>{playerId} </color> win!");
 
             return result;
         }
@@ -96,9 +96,13 @@ namespace Connect4.Scripts.IWinningStrategy
 
         private bool FourInDiagonal(List<Cell> diagonal, PlayerId playerId)
         {
+            // Debug.Log("\n");
             for (var i = 0; i < 4; i++)
+            {
+                // Debug.Log($"index: {diagonal[i].Index} id: {diagonal[i].CellId}");
                 if (diagonal[i].CellId != playerId)
                     return false;
+            }
 
             return true;
         }

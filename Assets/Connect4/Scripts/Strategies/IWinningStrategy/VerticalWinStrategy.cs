@@ -12,19 +12,23 @@ namespace Connect4.Scripts.IWinningStrategy
                 return false;
 
             var column = gridService.GetColumn(index.y);
-            var result = FourInColumn(index.x, column, playerId);
+            var result = FourInColumn(column, index.x, playerId);
 
-            if(result)
-                Debug.Log($"<color=green>{playerId} </color> win!");
+            // if(result)
+            //     Debug.Log($"<color=green>{playerId} </color> win!");
             
             return result;
         }
         
-        private bool FourInColumn(int index, Cell[] column, PlayerId playerId)
+        private bool FourInColumn(Cell[] column, int index, PlayerId playerId)
         {
+            // Debug.Log("\n");
             for (var i = index; i < index + 4; i++)
+            {
+                // Debug.Log($"index: {column[i].Index} id: {column[i].CellId}");
                 if (column[i].CellId != playerId)
                     return false;
+            }
 
             return true;
         }

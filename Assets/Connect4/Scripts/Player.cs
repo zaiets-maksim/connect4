@@ -64,7 +64,10 @@ public class Human : Player
         moveCommand.ToHistory();
         
         if (_victoryCheckerService.TurnIsWin(index, _gameCurator.ActivePlayer.PlayerId)) // to finish service && check full field
+        {
+            Debug.Log($"<color=green>{_gameCurator.ActivePlayer.PlayerId} </color> win!");
             return;
+        }
         
         _gameCurator.EndTurn();
     }
@@ -82,7 +85,13 @@ public class Computer : Player
         MoveCommand moveCommand = new MoveCommand(index, this, _commandHistoryService, _gridService, _moveVisualizer);
         await moveCommand.Execute();
         moveCommand.ToHistory();
-        
+
+        if (_victoryCheckerService.TurnIsWin(index, _gameCurator.ActivePlayer.PlayerId)) // to finish service && check full field
+        {
+            Debug.Log($"<color=green>{_gameCurator.ActivePlayer.PlayerId} </color> win!");
+            return;
+        }
+
         _gameCurator.EndTurn();
     }
 }
