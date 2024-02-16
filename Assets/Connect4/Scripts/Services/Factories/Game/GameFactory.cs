@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using Connect4.Scripts.UI;
+using UnityEngine;
 using Zenject;
 
 namespace Infrastructure.Services.Factories.Game
@@ -9,16 +10,30 @@ namespace Infrastructure.Services.Factories.Game
         private const string CellCreatorPath = "Prefabs/Cell";
         private const string ColumnCreatorPath = "Prefabs/Column";
         private const string PiecePath = "Prefabs/Piece";
-        
-        private readonly IGameCurator _gameCurator;
-        private IGridService _gridService;
+        private const string HudPath = "UI/Hud";
+        private const string ShinePath = "Prefabs/Shine";
+        private const string CameraPath = "Prefabs/MainCamera";
 
-        public GameFactory(IInstantiator instantiator, IGameCurator gameCurator, IGridService gridService) : base(instantiator)
+        
+        private readonly IGridService _gridService;
+        
+        public Hud Hud { get; private set; }
+        public CameraScript Camera { get; private set; }
+
+        public GameFactory(IInstantiator instantiator, IGridService gridService) : base(instantiator)
         {
             _gridService = gridService;
-            _gameCurator = gameCurator;
         }
         
+        public CameraScript CreateCamera() => 
+            Camera = Object.Instantiate(Resources.Load<CameraScript>(CameraPath));
+
+        public Shine CreateShine() => 
+            Object.Instantiate(Resources.Load<Shine>(ShinePath));
+
+        public Hud CreateHud() => 
+            Hud = InstantiateOnActiveScene(HudPath).GetComponent<Hud>();
+
         public Piece CreatePiece(Vector2 position, Color color)
         {
             var prefab = InstantiateOnActiveScene(PiecePath);
@@ -29,7 +44,7 @@ namespace Infrastructure.Services.Factories.Game
 
             return piece;
         }
-        
+
         public Cell CreateCell(int x, int y, float offsetX, float offsetY, float scale, Transform parent)
         {
             var prefab = InstantiateOnActiveScene(CellCreatorPath);
@@ -43,8 +58,8 @@ namespace Infrastructure.Services.Factories.Game
 
             return cell;
         }
-        
-        public void CreateColumn(int height, float offsetX, float offsetY, int index, GameObject parent)
+
+        public void CreateColumn(int height, float offsetX, float offsetY, int index, GameObject parent, IGameCurator gameCurator)
         {
             var obj = InstantiateOnActiveScene(ColumnCreatorPath);
             obj.transform.SetParent(parent.transform);
@@ -52,10 +67,10 @@ namespace Infrastructure.Services.Factories.Game
             obj.transform.localScale = new Vector3(0.92f, 1.095f * height, 0);
 
             var column = obj.GetComponent<Column>();
-            column.Initialize(_gameCurator, index, height);
+            column.Initialize(gameCurator, index, height);
             _gridService.Columns.Add(column);
         }
-        
+
 
         public void CreateGrid() => InstantiateOnActiveScene(GridCreatorPath);
     }

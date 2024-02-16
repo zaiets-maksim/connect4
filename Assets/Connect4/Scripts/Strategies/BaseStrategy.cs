@@ -8,10 +8,9 @@ namespace Connect4.Scripts.Strategies
         protected IGridService _gridService;
         protected IGameCurator _gameCurator;
 
-        protected BaseStrategy(IGridService gridService, IGameCurator gameCurator)
+        protected BaseStrategy(IGridService gridService)
         {
             _gridService = gridService;
-            _gameCurator = gameCurator;
         }
 
         protected bool GetOpponentStreak(ICommand command, Cell[] row, out List<Vector2Int> indexes, int streak)

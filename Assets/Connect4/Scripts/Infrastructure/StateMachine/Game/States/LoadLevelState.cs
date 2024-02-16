@@ -1,11 +1,12 @@
-﻿using Connect4.Scripts.Services.VictoryCheckerService;
+﻿using System;
+using Connect4.Scripts.Services.VictoryCheckerService;
 using Infrastructure.Services.Factories.Game;
 using Infrastructure.Services.Factories.UIFactory;
 using Zenject;
 
 namespace Infrastructure.StateMachine.Game.States
 {
-    public class LoadLevelState : IPayloadedState<string>, IGameState
+    public class LoadLevelState : IPayloadedState<Tuple<Player, Player>>, IGameState
     {
         private readonly ISceneLoader _sceneLoader;
         private readonly ILoadingCurtain _loadingCurtain;
@@ -18,13 +19,17 @@ namespace Infrastructure.StateMachine.Game.States
         private readonly IVictoryCheckerService _victoryCheckerService;
         private readonly ITurnCalculationsService _turnCalculationsService;
         private readonly ICommandHistoryService _commandHistoryService;
+        private readonly IVictoryVisualizer _victoryVisualizer;
+        private Tuple<Player, Player> _players;
 
         [Inject]
         public LoadLevelState(IStateMachine<IGameState> gameStateMachine, ISceneLoader sceneLoader,
             ILoadingCurtain loadingCurtain, IUIFactory uiFactory, IGameFactory gameFactory, IGameCurator gameCurator,
             IMoveVisualizer moveVisualizer, IGridService gridService, IVictoryCheckerService victoryCheckerService,
-            ITurnCalculationsService turnCalculationsService, ICommandHistoryService commandHistoryService)
+            ITurnCalculationsService turnCalculationsService, ICommandHistoryService commandHistoryService,
+            IVictoryVisualizer victoryVisualizer)
         {
+            _victoryVisualizer = victoryVisualizer;
             _commandHistoryService = commandHistoryService;
             _turnCalculationsService = turnCalculationsService;
             _victoryCheckerService = victoryCheckerService;
@@ -38,10 +43,11 @@ namespace Infrastructure.StateMachine.Game.States
             _uiFactory = uiFactory;
         }
 
-        public void Enter(string payload)
+        public void Enter(Tuple<Player, Player> players)
         {
+            _players = players;
             _loadingCurtain.Show();
-            _sceneLoader.Load(payload, OnLevelLoad);
+            _sceneLoader.Load("First", OnLevelLoad);
         }
 
         public void Exit()
@@ -51,17 +57,25 @@ namespace Infrastructure.StateMachine.Game.States
 
         protected virtual void OnLevelLoad()
         {
+            Clear();
             InitGameWorld();
 
             _gameStateMachine.Enter<GameLoopState>();
         }
 
         private void InitGameWorld()
-        {
+        { 
+           _gameFactory.CreateCamera();
            _uiFactory.CreateUiRoot();
            _gameFactory.CreateGrid();
-           _gameCurator.Initialize(_moveVisualizer, _gridService, _victoryCheckerService, _turnCalculationsService, _commandHistoryService);
-           _gameCurator.SetPlayers<Player>(new Human(), new Computer());
+           _gameFactory.CreateHud();
+
+           _gameCurator.SetPlayers(_players.Item1, _players.Item2);
+        }
+
+        private void Clear()
+        {
+            _gridService.Clear();
         }
     }
 }

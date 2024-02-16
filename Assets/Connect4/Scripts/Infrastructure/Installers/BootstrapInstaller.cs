@@ -1,13 +1,11 @@
+using Connect4.Scripts.Infrastructure.StateMachine.Game.States;
 using Connect4.Scripts.Services.VictoryCheckerService;
 using Infrastructure.Services.Factories.Game;
 using Infrastructure.Services.Factories.UIFactory;
-using Infrastructure.Services.PersistenceProgress;
 using Infrastructure.Services.StaticData;
-using Infrastructure.Services.Window;
 using Infrastructure.StateMachine;
 using Infrastructure.StateMachine.Game;
 using Infrastructure.StateMachine.Game.States;
-using RunManGun.Infrastructure.Services.Window;
 using UnityEngine;
 using Zenject;
 using Application = UnityEngine.Application;
@@ -39,15 +37,13 @@ namespace Infrastructure.Installers
             BindStaticDataService();
             Container.BindInterfacesTo<UIFactory>().AsSingle();
             Container.BindInterfacesTo<GameFactory>().AsSingle();
-            Container.BindInterfacesTo<WindowService>().AsSingle();
-            Container.BindInterfacesTo<PersistenceProgressService>().AsSingle(); 
-            Container.BindInterfacesTo<FPSMeter>().AsSingle();
             Container.BindInterfacesTo<GridService>().AsSingle();
             Container.BindInterfacesTo<GameCurator>().AsSingle();
             Container.BindInterfacesTo<MoveVisualizer>().AsSingle();
             Container.BindInterfacesTo<VictoryCheckerService>().AsSingle();
             Container.BindInterfacesTo<TurnCalculationsService>().AsSingle();
             Container.BindInterfacesTo<CommandHistoryService>().AsSingle();
+            Container.BindInterfacesTo<VictoryVisualizer>().AsSingle();
         }
 
         private void BindMonoServices()
@@ -82,6 +78,7 @@ namespace Infrastructure.Installers
             Container.Bind<BootstrapState>().AsSingle();
             Container.Bind<LoadProgressState>().AsSingle();
             Container.Bind<LoadLevelState>().AsSingle();
+            Container.Bind<MenuLevelState>().AsSingle();
             Container.Bind<GameLoopState>().AsSingle();
         }
 

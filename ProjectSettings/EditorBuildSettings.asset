@@ -11,4 +11,7 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Connect4/Scenes/First.unity
     guid: 9c23aca0f50c20b4fa9d8e5f993fa38a
+  - enabled: 1
+    path: Assets/Connect4/Scenes/Menu.unity
+    guid: 9ab59ca42787f514fa0cf3d952383776
   m_configObjects: {}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Connect4.Scripts.Infrastructure.StateMachine.Game.States;
 using Infrastructure.StateMachine.Game.States;
 using Zenject;
 
@@ -18,6 +19,7 @@ namespace Infrastructure.StateMachine.Game
                 [typeof(BootstrapState)] = container.Resolve<BootstrapState>,
                 [typeof(LoadProgressState)] = container.Resolve<LoadProgressState>,
                 [typeof(LoadLevelState)] = container.Resolve<LoadLevelState>,
+                [typeof(MenuLevelState)] = container.Resolve<MenuLevelState>,
                 [typeof(GameLoopState)] = container.Resolve<GameLoopState>,
                 
             };

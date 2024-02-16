@@ -11,7 +11,8 @@ namespace Connect4.Scripts.Commands
 
         public Vector2Int Index { get; }
         public Player ActivePlayer { get; }
-        
+        public Piece Piece { get; set; }
+
         public MoveCommand(Vector2Int index, Player activePlayer, ICommandHistoryService commandHistoryService, IGridService gridService,
             IMoveVisualizer moveVisualizer)
         {
@@ -31,8 +32,9 @@ namespace Connect4.Scripts.Commands
         public async Task Execute()
         {
             Debug.Log($"{ActivePlayer.PlayerId} is making a move");
-        
-            await _moveVisualizer.ShowTurn(_gridService.GetCell(Index.x, Index.y).Position, ActivePlayer.Color);
+
+            var position = _gridService.GetCell(Index.x, Index.y).Position;
+            await _moveVisualizer.ShowTurn(position, this);
             _gridService.TakeCell(Index.x, Index.y, ActivePlayer.PlayerId);
         
             Debug.Log($"{ActivePlayer.PlayerId} made a move");
@@ -40,10 +42,8 @@ namespace Connect4.Scripts.Commands
 
         public async void Undo()
         {
-            ICommand lastCommand = _commandHistoryService.Pop();
-
-            var index = lastCommand.Index;
-            await _moveVisualizer.ShowTurn(_gridService.GetCell(index.x, index.y).Position, ActivePlayer.Color); // wrong!!!
+            _commandHistoryService.Pop();
+            await _moveVisualizer.CancelTurn(Piece);
             _gridService.ReleaseCell(Index.x, Index.y);
         }
 

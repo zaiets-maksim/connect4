@@ -42,6 +42,18 @@ namespace Infrastructure.StateMachine
             return state;
         }
 
+
+        // public TState Enter<TState, TPayload>((Human, Computer) payload) where TState : class, TBaseState, IPayloadedState<TPayload>
+        // {
+        //     ChangeState(out TState state);
+        //
+        //     _lastStateInfo = _currentStateInfo;
+        //     _currentStateInfo = new PayloadedStateInfo<TState, TBaseState, TPayload>(this, state, payload);
+        //
+        //     state.Enter(payload);
+        //     return state;
+        // }
+
         public bool Back()
         {
             if (_lastStateInfo == null)
