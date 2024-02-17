@@ -10,6 +10,7 @@ namespace Editor
     {
         private ReorderableList _reorderableList;
         private readonly List<Object> _objectList = new List<Object>();
+        private readonly string _assetBundlesPath = Application.streamingAssetsPath + "/AssetBundles/";
         private string _bundleName = "bundle";
 
         [MenuItem("Tools/Bundle Manager")]
@@ -51,7 +52,10 @@ namespace Editor
                 GUI.Label(rect, "Size: " + FormatSize(fileSize));
             };
 
-            _reorderableList.drawHeaderCallback = (Rect rect) => { EditorGUI.LabelField(rect, "Object List"); };
+            _reorderableList.drawHeaderCallback = (Rect rect) =>
+            {
+                EditorGUI.LabelField(rect, "Object List");
+            };
         }
 
         private void OnGUI()
@@ -59,19 +63,17 @@ namespace Editor
             _reorderableList.DoLayoutList();
             _bundleName = EditorGUILayout.TextField("Enter Bundle Name:", _bundleName);
 
-            if (GUILayout.Button("Build bundles")) 
-                BuildBundles();
+            if (GUILayout.Button("Build bundle")) 
+                BuildBundle();
 
             if (Event.current.type == EventType.Layout)
                 SaveData();
         }
 
-        private void BuildBundles()
+        private void BuildBundle()
         {
-            string outputPath = "Assets/StreamingAssets/AssetBundles";
-
-            if (!Directory.Exists(outputPath))
-                Directory.CreateDirectory(outputPath);
+            if (!Directory.Exists(_assetBundlesPath))
+                Directory.CreateDirectory(_assetBundlesPath);
 
             AssetBundleBuild[] buildMap = new AssetBundleBuild[1];
 
@@ -88,7 +90,7 @@ namespace Editor
                 assetNames = assetPaths.ToArray()
             };
 
-            BuildPipeline.BuildAssetBundles(outputPath, buildMap, BuildAssetBundleOptions.None, BuildTarget.Android);
+            BuildPipeline.BuildAssetBundles(_assetBundlesPath, buildMap, BuildAssetBundleOptions.None, BuildTarget.Android);
         }
 
         private long GetFileSize(Object obj)
@@ -136,8 +138,5 @@ namespace Editor
                 }
             }
         }
-        
-        private void ShowInfo(string text, MessageType messageType) => 
-            EditorGUILayout.HelpBox(text, messageType, true);
     }
 }
