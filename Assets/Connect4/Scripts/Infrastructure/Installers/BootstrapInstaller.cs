@@ -1,4 +1,5 @@
 using Connect4.Scripts.Infrastructure.StateMachine.Game.States;
+using Connect4.Scripts.Services.BundleLoader;
 using Connect4.Scripts.Services.VictoryCheckerService;
 using Infrastructure.Services.Factories.Game;
 using Infrastructure.Services.Factories.UIFactory;
@@ -44,6 +45,7 @@ namespace Infrastructure.Installers
             Container.BindInterfacesTo<TurnCalculationsService>().AsSingle();
             Container.BindInterfacesTo<CommandHistoryService>().AsSingle();
             Container.BindInterfacesTo<VictoryVisualizer>().AsSingle();
+            Container.BindInterfacesTo<BundleLoader>().AsSingle();
         }
 
         private void BindMonoServices()
