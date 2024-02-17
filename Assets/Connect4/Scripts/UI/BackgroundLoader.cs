@@ -21,7 +21,7 @@ namespace Connect4.Scripts.UI
     
         private void Start()
         {
-            var textures = _bundleLoader.LoadBundle<Texture2D>(_bundleName);
+            var textures = _bundleLoader.LoadAssets<Texture2D>(_bundleName);
             var randomTexture = textures[Random.Range(0, textures.Count)];
         
             SetBackground(randomTexture);

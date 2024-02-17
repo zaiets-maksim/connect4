@@ -6,11 +6,9 @@ namespace Connect4.Scripts.Services.BundleLoader
     public class BundleLoader : IBundleLoader
     {
         private readonly string _assetBundlesPath = Application.streamingAssetsPath + "/AssetBundles/";
-
-        public List<T> LoadBundle<T> (string name)
+        
+        public AssetBundle LoadBundle (string name)
         {
-            List<T> resources = new List<T>();
-
             AssetBundle assetBundle = AssetBundle.LoadFromFile(_assetBundlesPath + name);
 
             if (assetBundle == null)
@@ -18,45 +16,54 @@ namespace Connect4.Scripts.Services.BundleLoader
                 Debug.LogError("Failed to load Asset Bundle: " + name);
                 return null;
             }
+            
+            AssetBundle bundle = assetBundle;
+
+            return bundle;
+        }
+        
+        public List<T> LoadAssets<T> (string bundleName)
+        {
+            List<T> resources = new List<T>();
+
+            var assetBundle = LoadBundle(bundleName);
 
             Object[] assets = assetBundle.LoadAllAssets();
+            assetBundle.Unload(false);
 
             foreach (Object asset in assets)
                 if (asset is T t)
                     resources.Add(t);
-
-            assetBundle.Unload(false);
 
             return resources;
         }
 
         public T LoadAsset<T>(string bundleName, string assetName) where T : Object
         {
-            string bundlePath = _assetBundlesPath + bundleName;
+            var assetBundle = LoadBundle(bundleName);
 
-            AssetBundle bundle = AssetBundle.LoadFromFile(bundlePath);
-
-            if (bundle == null)
+            if (assetBundle == null)
             {
-                Debug.LogError("Failed to load Asset Bundle from file: " + bundlePath);
+                Debug.LogError("Failed to load Asset Bundle from file: " + _assetBundlesPath);
                 return null;
             }
 
-            T loadedObject = bundle.LoadAsset<T>(assetName);
-            bundle.Unload(false);
+            T loadedObject = assetBundle.LoadAsset<T>(assetName);
+            assetBundle.Unload(false);
 
             if (loadedObject != null)
                 return loadedObject;
             
             Debug.LogError("Failed to load asset from Asset Bundle.");
-
+            
             return null;
         }
     }
 
     public interface IBundleLoader
     {
-        List<T> LoadBundle<T>(string name);
+        AssetBundle LoadBundle(string name);
+        List<T> LoadAssets<T>(string bundleName);
         T LoadAsset<T>(string bundleName, string assetName) where T : Object;
     }
 }
