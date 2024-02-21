@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using Connect4.Scripts.Extensions;
 using UnityEngine;
 
 namespace Connect4.Scripts.Services.WeatherService
