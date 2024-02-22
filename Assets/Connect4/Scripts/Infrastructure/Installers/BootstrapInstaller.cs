@@ -46,6 +46,7 @@ namespace Infrastructure.Installers
             Container.BindInterfacesTo<CommandHistoryService>().AsSingle();
             Container.BindInterfacesTo<VictoryVisualizer>().AsSingle();
             Container.BindInterfacesTo<BundleLoader>().AsSingle();
+            Container.BindInterfacesTo<FinishService>().AsSingle();
         }
 
         private void BindMonoServices()

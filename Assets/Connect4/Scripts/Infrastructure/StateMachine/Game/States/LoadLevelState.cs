@@ -14,27 +14,23 @@ namespace Infrastructure.StateMachine.Game.States
         private readonly IStateMachine<IGameState> _gameStateMachine;
         private readonly IGameCurator _gameCurator;
         private readonly IGameFactory _gameFactory;
-        private readonly IMoveVisualizer _moveVisualizer;
         private readonly IGridService _gridService;
         private readonly IVictoryCheckerService _victoryCheckerService;
-        private readonly ITurnCalculationsService _turnCalculationsService;
-        private readonly ICommandHistoryService _commandHistoryService;
         private readonly IVictoryVisualizer _victoryVisualizer;
+        private readonly IFinishService _finishService;
+        
         private Tuple<Player, Player> _players;
 
         [Inject]
         public LoadLevelState(IStateMachine<IGameState> gameStateMachine, ISceneLoader sceneLoader,
             ILoadingCurtain loadingCurtain, IUIFactory uiFactory, IGameFactory gameFactory, IGameCurator gameCurator,
-            IMoveVisualizer moveVisualizer, IGridService gridService, IVictoryCheckerService victoryCheckerService,
-            ITurnCalculationsService turnCalculationsService, ICommandHistoryService commandHistoryService,
-            IVictoryVisualizer victoryVisualizer)
+            IGridService gridService, IVictoryCheckerService victoryCheckerService,
+            IVictoryVisualizer victoryVisualizer, IFinishService finishService)
         {
+            _finishService = finishService;
             _victoryVisualizer = victoryVisualizer;
-            _commandHistoryService = commandHistoryService;
-            _turnCalculationsService = turnCalculationsService;
             _victoryCheckerService = victoryCheckerService;
             _gridService = gridService;
-            _moveVisualizer = moveVisualizer;
             _gameCurator = gameCurator;
             _gameFactory = gameFactory;
             _gameStateMachine = gameStateMachine;
@@ -69,7 +65,7 @@ namespace Infrastructure.StateMachine.Game.States
            _uiFactory.CreateUiRoot();
            _gameFactory.CreateGrid();
            _gameFactory.CreateHud();
-
+           _finishService.Initialize(_victoryCheckerService, _victoryVisualizer, _gridService, _gameFactory.Hud.CurrentTurnViewer);
            _gameCurator.SetPlayers(_players.Item1, _players.Item2);
         }
 

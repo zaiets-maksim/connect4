@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using Connect4.Scripts.Commands;
-using Connect4.Scripts.Services.VictoryCheckerService;
 using UnityEngine;
 
 public abstract class Player
@@ -8,27 +7,24 @@ public abstract class Player
     protected IGameCurator _gameCurator;
     protected IMoveVisualizer _moveVisualizer;
     protected IGridService _gridService;
-    protected IVictoryCheckerService _victoryCheckerService;
     protected ITurnCalculationsService _turnCalculationsService;
     protected ICommandHistoryService _commandHistoryService;
     protected CurrentTurnViewer _currentTurnViewer;
-    protected IVictoryVisualizer _victoryVisualizer;
+    protected IFinishService _finishService;
 
     public Color Color { get; private set; }
     public PlayerId PlayerId { get; private set; }
     public bool IsReady { get; set; }
 
     public void Initialize(IGameCurator gameCurator, IMoveVisualizer moveVisualizer, IGridService gridService,
-        IVictoryCheckerService victoryCheckerService, ITurnCalculationsService turnCalculationsService, 
-        ICommandHistoryService commandHistoryService, CurrentTurnViewer currentTurnViewer, IVictoryVisualizer victoryVisualizer,
-        PlayerId playerId, Color color)
+        ITurnCalculationsService turnCalculationsService, ICommandHistoryService commandHistoryService,
+        CurrentTurnViewer currentTurnViewer, IFinishService finishService, PlayerId playerId, Color color)
     {
         Color = color;
         PlayerId = playerId;
-        _victoryVisualizer = victoryVisualizer;
+        _finishService = finishService;
         _currentTurnViewer = currentTurnViewer;
         _turnCalculationsService = turnCalculationsService;
-        _victoryCheckerService = victoryCheckerService;
         _gridService = gridService;
         _moveVisualizer = moveVisualizer;
         _gameCurator = gameCurator;
@@ -44,7 +40,6 @@ public abstract class Player
         _gameCurator.ActivePlayer.IsReady = true;
         
         Debug.Log('\n');
-        Debug.Log(_currentTurnViewer);
         _currentTurnViewer.UpdateTurn($"{PlayerId} turn", Color);
         Debug.Log($"<color=yellow>{PlayerId} ({PlayerId.GetType()}) </color> awaiting...");
 
@@ -70,15 +65,9 @@ public class Human : Player
         await moveCommand.Execute();
         moveCommand.ToHistory();
         
-        if (_victoryCheckerService.TurnIsWin(index, PlayerId)) // to finish service && check full field
-        {
-            _currentTurnViewer.UpdateTurn($"{PlayerId} win!", Color);
-            _victoryVisualizer.Show(_victoryCheckerService.GetWinStrategies(), Color);
-            
-            Debug.Log($"<color=green>{PlayerId} </color> win!");
+        if (_finishService.CheckFinish(index, this))
             return;
-        }
-        
+
         _gameCurator.EndTurn();
     }
 }
@@ -98,13 +87,8 @@ public class Computer : Player
         await moveCommand.Execute();
         moveCommand.ToHistory();
 
-        if (_victoryCheckerService.TurnIsWin(index, PlayerId)) // to finish service && check full field
-        {
-            _currentTurnViewer.UpdateTurn($"{PlayerId} win!", Color);
-            _victoryVisualizer.Show(_victoryCheckerService.GetWinStrategies(), Color);
-            Debug.Log($"<color=green>{PlayerId} </color> win!");
+        if (_finishService.CheckFinish(index, this))
             return;
-        }
 
         _gameCurator.EndTurn();
     }
