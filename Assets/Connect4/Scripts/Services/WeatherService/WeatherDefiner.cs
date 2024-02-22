@@ -31,8 +31,10 @@ namespace Connect4.Scripts.Services.WeatherService
             yield return this.GetData<Root>(weatherApi, Output);
         }
 
-        private void Output(Root root) => 
+        private void Output(Root root)
+        {
             _currentWeatherText.text = $"{root.name} \n {root.weather[0].description} {ToCelsius(root.main.temp):0.0}°C";
+        }
 
         private double ToCelsius(double inKelvins) => 
             inKelvins + KELVIN;

@@ -512,11 +512,11 @@ RectTransform:
   m_Father: {fileID: 8840650886292490645}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 0.5}
+  m_AnchorMax: {x: 1, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 320, y: 150}
-  m_Pivot: {x: 0.5, y: 1}
+  m_SizeDelta: {x: 0, y: 150}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4393242436038061045
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -961,30 +961,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eeb195efc013e15419b1eadd7d8fce78, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _weatherData: {fileID: 4485102608198469462}
-  _info:
-    ip: 
-    city: 
-    region: 
-    region_code: 
-    country_code: 
-    country_code_iso3: 
-    country_name: 
-    country_capital: 
-    country_tld: 
-    continent_code: 
-    in_eu: 0
-    postal: 
-    latitude: 0
-    longitude: 0
-    timezone: 
-    utc_offset: 
-    country_calling_code: 
-    currency: 
-    currency_name: 
-    languages: 
-    asn: 
-    org: 
+  weatherDefiner: {fileID: 4485102608198469462}
 --- !u!114 &4485102608198469462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -999,7 +976,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   _currentWeatherText: {fileID: 2629517489410837509}
   _apiKey: 9645b088d8ac759edde6a815197d7bda
-  minutesBetweenUpdate: 1
 --- !u!1 &5598999032481183530
 GameObject:
   m_ObjectHideFlags: 0
