@@ -221,7 +221,7 @@ public class TurnCalculationsService : ITurnCalculationsService
     private Vector2Int TakeColumn(int index)
     {
         var column = _gridService.Columns[index];
-        column.AddLastElementIndex();
+        column.AddElement();
 
         return new Vector2Int(column.LastElementIndex, column.Index);
     }
@@ -229,7 +229,7 @@ public class TurnCalculationsService : ITurnCalculationsService
     private void ReleaseColumn(int index)
     {
         var column = _gridService.Columns[index];
-        column.RemoveLastElementIndex();
+        column.RemoveElement();
     }
 }
 
