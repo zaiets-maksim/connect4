@@ -34,13 +34,13 @@ public class Column : MonoBehaviour
 
     private void DoTurn()
     {
-        AddElement();
+        TakeElement();
         _gameCurator.ActivePlayer.DoTurn(new Vector2Int(LastElementIndex, _index));
     }
 
-    public void AddElement() => 
+    public void TakeElement() => 
         --LastElementIndex;
     
-    public void RemoveElement() => 
+    public void ReleaseElement() => 
         ++LastElementIndex;
 }
