@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
+using Connect4.Scripts.Commands;
+using Connect4.Scripts.Services.GridService;
 using Connect4.Scripts.Turns;
 using UnityEngine;
 
-namespace Connect4.Scripts.Strategies.IBlockingStrategy
+namespace Connect4.Scripts.Strategies.Build
 {
     public class HorizontalBuildingStrategy : BaseStrategy, ILineBuildingStrategy
     {

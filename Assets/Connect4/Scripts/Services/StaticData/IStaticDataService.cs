@@ -1,12 +1,10 @@
-using RunManGun.Window;
-using StaticData;
+using Connect4.Scripts.StaticData;
 
-namespace Infrastructure.Services.StaticData
+namespace Connect4.Scripts.Services.StaticData
 {
     public interface IStaticDataService
     {
         void LoadData();
         GameStaticData GameConfig();
-        WindowConfig ForWindow(WindowTypeId windowTypeId);
     }
 }

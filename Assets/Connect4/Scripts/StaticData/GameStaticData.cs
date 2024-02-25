@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Infrastructure.Services
+namespace Connect4.Scripts.StaticData
 {
     [CreateAssetMenu(menuName = "StaticData/Game", fileName = "GameConfig", order = 0)]
     public class GameStaticData : ScriptableObject

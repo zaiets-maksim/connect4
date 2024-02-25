@@ -1,5 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
+using Connect4.Scripts.Field;
+using Connect4.Scripts.Services.GridService;
 using Connect4.Scripts.Strategies.Win;
 using UnityEngine;
 
@@ -13,18 +15,12 @@ namespace Connect4.Scripts.Services.VictoryCheckerService
 
         private readonly IGridService _gridService;
         private List<IWinningStrategy> _wonStrategies;
-        
-        
+
         public VictoryCheckerService(IGridService gridService) =>
             _gridService = gridService;
 
         public bool TurnIsWin(Vector2Int index, PlayerId playerId)
         {
-            // Debug.Log(index);
-            // var indexes = _gridService.GetRow(5).Select(x => x.CellId).ToList();
-            // string listString = string.Join(" ", indexes);
-            // Debug.Log(listString);
-
             var strategies = new IWinningStrategy[] 
             {
                 _verticalWinStrategy,

@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Connect4.Scripts.Services.BundleLoader
+namespace Connect4.Scripts.Infrastructure
 {
-    public class BundleLoader : IBundleLoader
+    public class BundleLoader
     {
-        private readonly string _assetBundlesPath = Application.streamingAssetsPath + "/AssetBundles/";
+        private static readonly string _assetBundlesPath = Application.streamingAssetsPath + "/AssetBundles/";
         
-        public AssetBundle LoadBundle (string name)
+        public static AssetBundle LoadBundle (string name)
         {
             AssetBundle assetBundle = AssetBundle.LoadFromFile(_assetBundlesPath + name);
 
@@ -22,7 +22,7 @@ namespace Connect4.Scripts.Services.BundleLoader
             return bundle;
         }
         
-        public List<T> LoadAssets<T> (string bundleName)
+        public static List<T> LoadAssets<T> (string bundleName)
         {
             List<T> resources = new List<T>();
 
@@ -38,7 +38,7 @@ namespace Connect4.Scripts.Services.BundleLoader
             return resources;
         }
 
-        public T LoadAsset<T>(string bundleName, string assetName) where T : Object
+        public static T LoadAsset<T>(string bundleName, string assetName) where T : Object
         {
             var assetBundle = LoadBundle(bundleName);
 
@@ -58,12 +58,5 @@ namespace Connect4.Scripts.Services.BundleLoader
             
             return null;
         }
-    }
-
-    public interface IBundleLoader
-    {
-        AssetBundle LoadBundle(string name);
-        List<T> LoadAssets<T>(string bundleName);
-        T LoadAsset<T>(string bundleName, string assetName) where T : Object;
     }
 }

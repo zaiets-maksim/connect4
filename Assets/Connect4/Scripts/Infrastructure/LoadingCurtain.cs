@@ -2,7 +2,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace Infrastructure
+namespace Connect4.Scripts.Infrastructure
 {
     public class LoadingCurtain : MonoBehaviour, ILoadingCurtain
     {

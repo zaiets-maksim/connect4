@@ -1,9 +1,16 @@
+using Connect4.Scripts.Infrastructure;
 using Connect4.Scripts.Infrastructure.StateMachine.Game.States;
-using Connect4.Scripts.Services.BundleLoader;
+using Connect4.Scripts.Services.CommandHistoryService;
+using Connect4.Scripts.Services.Factories.Game;
+using Connect4.Scripts.Services.Factories.UIFactory;
+using Connect4.Scripts.Services.FinishService;
+using Connect4.Scripts.Services.GameCurator;
+using Connect4.Scripts.Services.GridService;
+using Connect4.Scripts.Services.MoveVisualizer;
+using Connect4.Scripts.Services.StaticData;
+using Connect4.Scripts.Services.TurnCalculationsService;
 using Connect4.Scripts.Services.VictoryCheckerService;
-using Infrastructure.Services.Factories.Game;
-using Infrastructure.Services.Factories.UIFactory;
-using Infrastructure.Services.StaticData;
+using Connect4.Scripts.Services.VictoryVisualizer;
 using Infrastructure.StateMachine;
 using Infrastructure.StateMachine.Game;
 using Infrastructure.StateMachine.Game.States;
@@ -45,7 +52,6 @@ namespace Infrastructure.Installers
             Container.BindInterfacesTo<TurnCalculationsService>().AsSingle();
             Container.BindInterfacesTo<CommandHistoryService>().AsSingle();
             Container.BindInterfacesTo<VictoryVisualizer>().AsSingle();
-            Container.BindInterfacesTo<BundleLoader>().AsSingle();
             Container.BindInterfacesTo<FinishService>().AsSingle();
         }
 

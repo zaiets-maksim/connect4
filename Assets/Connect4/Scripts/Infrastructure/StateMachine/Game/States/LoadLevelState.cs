@@ -1,7 +1,13 @@
 ﻿using System;
+using Connect4.Scripts.Infrastructure;
+using Connect4.Scripts.Player;
+using Connect4.Scripts.Services.Factories.Game;
+using Connect4.Scripts.Services.Factories.UIFactory;
+using Connect4.Scripts.Services.FinishService;
+using Connect4.Scripts.Services.GameCurator;
+using Connect4.Scripts.Services.GridService;
 using Connect4.Scripts.Services.VictoryCheckerService;
-using Infrastructure.Services.Factories.Game;
-using Infrastructure.Services.Factories.UIFactory;
+using Connect4.Scripts.Services.VictoryVisualizer;
 using Zenject;
 
 namespace Infrastructure.StateMachine.Game.States

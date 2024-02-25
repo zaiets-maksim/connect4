@@ -1,4 +1,4 @@
-﻿namespace Infrastructure
+﻿namespace Connect4.Scripts.Infrastructure
 {
     public interface ILoadingCurtain
     {

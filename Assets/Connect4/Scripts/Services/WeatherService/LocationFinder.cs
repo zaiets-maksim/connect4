@@ -9,7 +9,7 @@ namespace Connect4.Scripts.Services.WeatherService
     {
         [SerializeField] private WeatherDefiner weatherDefiner;
 
-        private readonly Coordinates _coordinates = new Coordinates();
+        private Coordinates _coordinates = new Coordinates();
         private string _ipAddress;
 
         private void Start()
@@ -37,7 +37,8 @@ namespace Connect4.Scripts.Services.WeatherService
 
             yield return this.GetData<Coordinates>(locationApi, result =>
             {
-                weatherDefiner.Initialize(result.latitude, result.longitude);
+                _coordinates = result;
+                weatherDefiner.Initialize(_coordinates.latitude, _coordinates.longitude);
             });
         }
 

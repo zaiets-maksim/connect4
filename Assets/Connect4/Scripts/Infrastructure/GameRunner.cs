@@ -2,7 +2,7 @@
 using UnityEngine;
 using Zenject;
 
-namespace Infrastructure
+namespace Connect4.Scripts.Infrastructure
 {
     public class GameRunner : MonoBehaviour
     {

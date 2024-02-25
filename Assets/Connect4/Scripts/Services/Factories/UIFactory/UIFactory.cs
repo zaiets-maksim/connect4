@@ -1,16 +1,13 @@
-﻿using Infrastructure.Services.StaticData;
-using RunManGun.Window;
-using StaticData;
+﻿using Connect4.Scripts.Services.StaticData;
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using Zenject;
 
-namespace Infrastructure.Services.Factories.UIFactory
+namespace Connect4.Scripts.Services.Factories.UIFactory
 {
     public class UIFactory : Factory, IUIFactory
     {
-        private const string UiRootPath = "UI/UiRoot";
-        private const string MenuPath = "UI/Menu";
+        private const string UiRootPath = "Prefabs/UI/UiRoot";
+        private const string MenuPath = "Prefabs/UI/Menu";
 
         private readonly IInstantiator _instantiator;
         private readonly IStaticDataService _staticData;

@@ -4,23 +4,26 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-public class LoadMenuButton : MonoBehaviour
+namespace Connect4.Scripts.UI.Buttons
 {
-    [SerializeField] private Button _button;
-
-    private IStateMachine<IGameState> _stateMachine;
-
-    [Inject]
-    public void Constructor(IStateMachine<IGameState> stateMachine)
+    public class LoadMenuButton : MonoBehaviour
     {
-        _stateMachine = stateMachine;
-    }
+        [SerializeField] private Button _button;
 
-    private void Start()
-    {
-        _button.onClick.AddListener(ToMenu);
-    }
+        private IStateMachine<IGameState> _stateMachine;
 
-    private void ToMenu() => 
-        _stateMachine.Enter<MenuLevelState, string>("Menu");
+        [Inject]
+        public void Constructor(IStateMachine<IGameState> stateMachine)
+        {
+            _stateMachine = stateMachine;
+        }
+
+        private void Start()
+        {
+            _button.onClick.AddListener(ToMenu);
+        }
+
+        private void ToMenu() => 
+            _stateMachine.Enter<MenuLevelState, string>("Menu");
+    }
 }

@@ -1,4 +1,6 @@
 using System;
+using Connect4.Scripts.Player;
+using Connect4.Scripts.Services.GameCurator;
 using Infrastructure.StateMachine;
 using Infrastructure.StateMachine.Game.States;
 using UnityEngine;
@@ -26,15 +28,15 @@ namespace Connect4.Scripts.UI.Buttons
 
         private void LoadLevel()
         {
-            Tuple<Player, Player> players = _gameMode switch
+            Tuple<Player.Player, Player.Player> players = _gameMode switch
             {
-                GameMode.HumanVsHuman => new Tuple<Player, Player>(new Human(), new Human()),
-                GameMode.HumanVsComputer => new Tuple<Player, Player>(new Human(), new Computer()),
-                GameMode.ComputerVsComputer => new Tuple<Player, Player>(new Computer(), new Computer()),
+                GameMode.HumanVsHuman => new Tuple<Player.Player, Player.Player>(new Human(), new Human()),
+                GameMode.HumanVsComputer => new Tuple<Player.Player, Player.Player>(new Human(), new Computer()),
+                GameMode.ComputerVsComputer => new Tuple<Player.Player, Player.Player>(new Computer(), new Computer()),
                 _ => null
             };
 
-            _stateMachine.Enter<LoadLevelState, Tuple<Player, Player>>(players);
+            _stateMachine.Enter<LoadLevelState, Tuple<Player.Player, Player.Player>>(players);
             _gameCurator.Init(_gameMode);
         }
     }

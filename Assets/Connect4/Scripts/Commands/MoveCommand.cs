@@ -1,4 +1,8 @@
 using System.Threading.Tasks;
+using Connect4.Scripts.Field;
+using Connect4.Scripts.Services.CommandHistoryService;
+using Connect4.Scripts.Services.GridService;
+using Connect4.Scripts.Services.MoveVisualizer;
 using UnityEngine;
 
 namespace Connect4.Scripts.Commands
@@ -10,10 +14,10 @@ namespace Connect4.Scripts.Commands
         private readonly IMoveVisualizer _moveVisualizer;
 
         public Vector2Int Index { get; }
-        public Player ActivePlayer { get; }
+        public Player.Player ActivePlayer { get; }
         public Piece Piece { get; set; }
 
-        public MoveCommand(Vector2Int index, Player activePlayer, ICommandHistoryService commandHistoryService, IGridService gridService,
+        public MoveCommand(Vector2Int index, Player.Player activePlayer, ICommandHistoryService commandHistoryService, IGridService gridService,
             IMoveVisualizer moveVisualizer)
         {
             _moveVisualizer = moveVisualizer;
@@ -23,7 +27,7 @@ namespace Connect4.Scripts.Commands
             Index = index;
         }
 
-        public MoveCommand(Vector2Int index, Player activePlayer)
+        public MoveCommand(Vector2Int index, Player.Player activePlayer)
         {
             ActivePlayer = activePlayer;
             Index = index;

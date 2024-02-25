@@ -1,6 +1,7 @@
-﻿using Connect4.Scripts.Infrastructure.StateMachine.Game.States;
-using Infrastructure.Services;
-using Infrastructure.Services.StaticData;
+﻿using Connect4.Scripts.Infrastructure;
+using Connect4.Scripts.Infrastructure.StateMachine.Game.States;
+using Connect4.Scripts.Services.StaticData;
+using Connect4.Scripts.StaticData;
 using UnityEngine.SceneManagement;
 
 namespace Infrastructure.StateMachine.Game.States

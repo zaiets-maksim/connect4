@@ -1,7 +1,9 @@
+using Connect4.Scripts.Field;
+using Connect4.Scripts.Services.GameCurator;
 using Connect4.Scripts.UI;
 using UnityEngine;
 
-namespace Infrastructure.Services.Factories.Game
+namespace Connect4.Scripts.Services.Factories.Game
 {
     public interface IGameFactory
     {

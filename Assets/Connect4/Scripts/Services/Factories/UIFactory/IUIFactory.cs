@@ -1,7 +1,4 @@
-﻿using RunManGun.Window;
-using UnityEngine;
-
-namespace Infrastructure.Services.Factories.UIFactory
+﻿namespace Connect4.Scripts.Services.Factories.UIFactory
 {
   public interface IUIFactory
   {

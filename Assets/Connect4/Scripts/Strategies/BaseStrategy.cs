@@ -1,4 +1,8 @@
 using System.Collections.Generic;
+using Connect4.Scripts.Commands;
+using Connect4.Scripts.Field;
+using Connect4.Scripts.Services.GameCurator;
+using Connect4.Scripts.Services.GridService;
 using UnityEngine;
 
 namespace Connect4.Scripts.Strategies

@@ -1,7 +1,6 @@
-using Connect4.Scripts.Services.BundleLoader;
+using Connect4.Scripts.Infrastructure;
 using UnityEngine;
 using UnityEngine.UI;
-using Zenject;
 
 namespace Connect4.Scripts.UI
 {
@@ -9,23 +8,15 @@ namespace Connect4.Scripts.UI
     {
         [SerializeField] private Image _background;
         [SerializeField] private string _bundleName;
-        [SerializeField] private string _assetName;  
-    
-        private IBundleLoader _bundleLoader;
+        [SerializeField] private string _assetName;
 
-        [Inject]
-        public void Constructor(IBundleLoader bundleLoader)
-        {
-            _bundleLoader = bundleLoader;
-        }
-    
         private void Start()
         {
-            var textures = _bundleLoader.LoadAssets<Texture2D>(_bundleName);
+            var textures = BundleLoader.LoadAssets<Texture2D>(_bundleName);
             var randomTexture = textures[Random.Range(0, textures.Count)];
         
             SetBackground(randomTexture);
-            // SetBackground(_bundleLoader.LoadAsset<Texture2D>(_bundleName, _assetName));
+            //SetBackground(BundleLoader.LoadAsset<Texture2D>(_bundleName, _assetName));
         }
 
         private void SetBackground(Texture2D loadedTexture)

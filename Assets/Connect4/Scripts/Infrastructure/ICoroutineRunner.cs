@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using UnityEngine;
 
-namespace Infrastructure
+namespace Connect4.Scripts.Infrastructure
 {
     public interface ICoroutineRunner
     {

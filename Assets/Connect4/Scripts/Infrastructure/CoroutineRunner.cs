@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Infrastructure
+namespace Connect4.Scripts.Infrastructure
 {
   public class CoroutineRunner : MonoBehaviour, ICoroutineRunner
   {

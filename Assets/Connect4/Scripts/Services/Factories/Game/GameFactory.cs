@@ -1,8 +1,11 @@
-﻿using Connect4.Scripts.UI;
+﻿using Connect4.Scripts.Field;
+using Connect4.Scripts.Services.GameCurator;
+using Connect4.Scripts.Services.GridService;
+using Connect4.Scripts.UI;
 using UnityEngine;
 using Zenject;
 
-namespace Infrastructure.Services.Factories.Game
+namespace Connect4.Scripts.Services.Factories.Game
 {
     public class GameFactory : Factory, IGameFactory
     {
@@ -10,7 +13,7 @@ namespace Infrastructure.Services.Factories.Game
         private const string CellCreatorPath = "Prefabs/Cell";
         private const string ColumnCreatorPath = "Prefabs/Column";
         private const string PiecePath = "Prefabs/Piece";
-        private const string HudPath = "UI/Hud";
+        private const string HudPath = "Prefabs/UI/Hud";
         private const string ShinePath = "Prefabs/Shine";
         private const string CameraPath = "Prefabs/MainCamera";
 

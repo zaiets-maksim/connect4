@@ -1,46 +1,50 @@
+using Connect4.Scripts.Services.GameCurator;
 using UnityEngine;
 
-public class Column : MonoBehaviour
+namespace Connect4.Scripts.Field
 {
-    private int _index;
-    private int _lastElementIndex = 0;
-
-    private IGameCurator _gameCurator;
-    public int Index => _index;
-
-    public int LastElementIndex
+    public class Column : MonoBehaviour
     {
-        get => _lastElementIndex;
-        private set => _lastElementIndex = value < 0 ? _lastElementIndex : value;
-    }
+        private int _index;
+        private int _lastElementIndex = 0;
 
-    public bool HasFreeCell => LastElementIndex > 0;
+        private IGameCurator _gameCurator;
+        public int Index => _index;
 
-    public void Initialize(IGameCurator gameCurator, int index, int lastElementIndex)
-    {
-        _gameCurator = gameCurator;
-        _index = index;
-        _lastElementIndex = lastElementIndex;
-    }
+        public int LastElementIndex
+        {
+            get => _lastElementIndex;
+            private set => _lastElementIndex = value < 0 ? _lastElementIndex : value;
+        }
 
-    private void OnMouseUp()
-    {
-        if(CanTurn())
-            DoTurn();
-    }
+        public bool HasFreeCell => LastElementIndex > 0;
 
-    private bool CanTurn() => 
-        LastElementIndex > 0 && _gameCurator.ActivePlayer.IsHuman() && _gameCurator.ActivePlayer.IsReady;
+        public void Initialize(IGameCurator gameCurator, int index, int lastElementIndex)
+        {
+            _gameCurator = gameCurator;
+            _index = index;
+            _lastElementIndex = lastElementIndex;
+        }
 
-    private void DoTurn()
-    {
-        TakeElement();
-        _gameCurator.ActivePlayer.DoTurn(new Vector2Int(LastElementIndex, _index));
-    }
+        private void OnMouseUp()
+        {
+            if(CanTurn())
+                DoTurn();
+        }
 
-    public void TakeElement() => 
-        --LastElementIndex;
+        private bool CanTurn() => 
+            LastElementIndex > 0 && _gameCurator.ActivePlayer.IsHuman() && _gameCurator.ActivePlayer.IsReady;
+
+        private void DoTurn()
+        {
+            TakeElement();
+            _gameCurator.ActivePlayer.DoTurn(new Vector2Int(LastElementIndex, _index));
+        }
+
+        public void TakeElement() => 
+            --LastElementIndex;
     
-    public void ReleaseElement() => 
-        ++LastElementIndex;
+        public void ReleaseElement() => 
+            ++LastElementIndex;
+    }
 }

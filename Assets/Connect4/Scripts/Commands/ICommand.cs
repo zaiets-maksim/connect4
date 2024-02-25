@@ -1,12 +1,15 @@
 using System.Threading.Tasks;
 using UnityEngine;
 
-public interface ICommand
+namespace Connect4.Scripts.Commands
 {
-    public Vector2Int Index { get; }
-    public Player ActivePlayer { get; }
+    public interface ICommand
+    {
+        public Vector2Int Index { get; }
+        public Player.Player ActivePlayer { get; }
     
-    public Task Execute();
-    public void Undo();
-    public void ToHistory();
+        public Task Execute();
+        public void Undo();
+        public void ToHistory();
+    }
 }

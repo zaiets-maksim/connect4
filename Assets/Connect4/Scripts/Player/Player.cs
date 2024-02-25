@@ -1,96 +1,107 @@
 ﻿using System.Threading.Tasks;
 using Connect4.Scripts.Commands;
+using Connect4.Scripts.Field;
+using Connect4.Scripts.Services.CommandHistoryService;
+using Connect4.Scripts.Services.FinishService;
+using Connect4.Scripts.Services.GameCurator;
+using Connect4.Scripts.Services.GridService;
+using Connect4.Scripts.Services.MoveVisualizer;
+using Connect4.Scripts.Services.TurnCalculationsService;
+using Connect4.Scripts.UI;
 using UnityEngine;
 
-public abstract class Player
+namespace Connect4.Scripts.Player
 {
-    protected IGameCurator _gameCurator;
-    protected IMoveVisualizer _moveVisualizer;
-    protected IGridService _gridService;
-    protected ITurnCalculationsService _turnCalculationsService;
-    protected ICommandHistoryService _commandHistoryService;
-    protected CurrentTurnViewer _currentTurnViewer;
-    protected IFinishService _finishService;
-
-    public Color Color { get; private set; }
-    public PlayerId PlayerId { get; private set; }
-    public bool IsReady { get; set; }
-
-    public void Initialize(IGameCurator gameCurator, IMoveVisualizer moveVisualizer, IGridService gridService,
-        ITurnCalculationsService turnCalculationsService, ICommandHistoryService commandHistoryService,
-        CurrentTurnViewer currentTurnViewer, IFinishService finishService, PlayerId playerId, Color color)
+    public abstract class Player
     {
-        Color = color;
-        PlayerId = playerId;
-        _finishService = finishService;
-        _currentTurnViewer = currentTurnViewer;
-        _turnCalculationsService = turnCalculationsService;
-        _gridService = gridService;
-        _moveVisualizer = moveVisualizer;
-        _gameCurator = gameCurator;
-        _commandHistoryService = commandHistoryService;
-    }
+        protected IGameCurator _gameCurator;
+        protected IMoveVisualizer _moveVisualizer;
+        protected IGridService _gridService;
+        protected ITurnCalculationsService _turnCalculationsService;
+        protected ICommandHistoryService _commandHistoryService;
+        protected CurrentTurnViewer _currentTurnViewer;
+        protected IFinishService _finishService;
+
+        public Color Color { get; private set; }
+        public PlayerId PlayerId { get; private set; }
+        public bool IsReady { get; set; }
+
+        public void Initialize(IGameCurator gameCurator, IMoveVisualizer moveVisualizer, IGridService gridService,
+            ITurnCalculationsService turnCalculationsService, ICommandHistoryService commandHistoryService,
+            CurrentTurnViewer currentTurnViewer, IFinishService finishService, PlayerId playerId, Color color)
+        {
+            Color = color;
+            PlayerId = playerId;
+            _finishService = finishService;
+            _currentTurnViewer = currentTurnViewer;
+            _turnCalculationsService = turnCalculationsService;
+            _gridService = gridService;
+            _moveVisualizer = moveVisualizer;
+            _gameCurator = gameCurator;
+            _commandHistoryService = commandHistoryService;
+        }
     
-    public bool IsHuman() => this is Human;
+        public bool IsHuman() => this is Human;
 
-    public abstract Task DoTurn(Vector2Int index);
+        public abstract Task DoTurn(Vector2Int index);
 
-    public void AwaitTurn()
-    {
-        _gameCurator.ActivePlayer.IsReady = true;
+        public void AwaitTurn()
+        {
+            _gameCurator.ActivePlayer.IsReady = true;
         
-        Debug.Log('\n');
-        _currentTurnViewer.UpdateTurn($"{PlayerId} turn", Color);
-        Debug.Log($"<color=yellow>{PlayerId} ({GetType()}) </color> awaiting...");
+            Debug.Log('\n');
+            _currentTurnViewer.UpdateTurn($"{PlayerId} turn", Color);
+            Debug.Log($"<color=yellow>{PlayerId} ({GetType().Name}) </color> awaiting...");
 
-        if (!IsHuman()) 
-            ComputerTurn();
+            if (!IsHuman()) 
+                ComputerTurn();
+        }
+
+        private void ComputerTurn()
+        {
+            Vector2Int index = _turnCalculationsService.GetBestDecisionFor(this);
+            index = _gridService.TakeColumn(index.y);
+            DoTurn(index);
+            Debug.Log($"Best decision: {index}");
+        }
     }
 
-    private void ComputerTurn()
+    public class Human : Player
     {
-        Vector2Int index = _turnCalculationsService.GetBestDecisionFor(this);
-        index = _gridService.TakeColumn(index.y);
-        DoTurn(index);
-        Debug.Log($"Best decision: {index}");
-    }
-}
+        public override async Task DoTurn(Vector2Int index)
+        {
+            _gameCurator.ActivePlayer.IsReady = false;
 
-public class Human : Player
-{
-    public override async Task DoTurn(Vector2Int index)
-    {
-        _gameCurator.ActivePlayer.IsReady = false;
-
-        MoveCommand moveCommand = new MoveCommand(index, this, _commandHistoryService, _gridService, _moveVisualizer);
-        await moveCommand.Execute();
-        moveCommand.ToHistory();
+            MoveCommand moveCommand = new MoveCommand(index, this, _commandHistoryService, _gridService, _moveVisualizer);
+            await moveCommand.Execute();
+            moveCommand.ToHistory();
         
-        if (_finishService.CheckFinish(index, this))
-            return;
+            if (_finishService.CheckFinish(index, this))
+                return;
 
-        _gameCurator.EndTurn();
+            _gameCurator.EndTurn();
+        }
     }
-}
 
-public class Computer : Player
-{
-    private Vector2Int _delay = new Vector2Int(100, 300);
+    public class Computer : Player
+    {
+        private Vector2Int _delay = new Vector2Int(100, 300);
     
-    public override async Task DoTurn(Vector2Int index)
-    {
-        var delay = Random.Range(_delay.x, _delay.y);
-        await Task.Delay(delay);
+        public override async Task DoTurn(Vector2Int index)
+        {
+            var delay = Random.Range(_delay.x, _delay.y);
+            await Task.Delay(delay);
         
-        _gameCurator.ActivePlayer.IsReady = false;
+            _gameCurator.ActivePlayer.IsReady = false;
 
-        MoveCommand moveCommand = new MoveCommand(index, this, _commandHistoryService, _gridService, _moveVisualizer);
-        await moveCommand.Execute();
-        moveCommand.ToHistory();
+            MoveCommand moveCommand = new MoveCommand(index, this, _commandHistoryService, _gridService, _moveVisualizer);
+            await moveCommand.Execute();
+            moveCommand.ToHistory();
 
-        if (_finishService.CheckFinish(index, this))
-            return;
+            if (_finishService.CheckFinish(index, this))
+                return;
 
-        _gameCurator.EndTurn();
+            _gameCurator.EndTurn();
+        }
     }
 }

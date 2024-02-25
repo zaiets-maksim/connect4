@@ -1,5 +1,7 @@
-using Infrastructure.Services.Factories.Game;
-using Infrastructure.Services.Factories.UIFactory;
+using Connect4.Scripts.Infrastructure;
+using Connect4.Scripts.Services.Factories.Game;
+using Connect4.Scripts.Services.Factories.UIFactory;
+using Connect4.Scripts.Services.GameCurator;
 using Zenject;
 
 namespace Infrastructure.StateMachine.Game.States

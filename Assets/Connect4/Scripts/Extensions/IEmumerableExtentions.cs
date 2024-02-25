@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Extensions
+namespace Connect4.Scripts.Extensions
 {
   public static class IEmumerableExtentions
   {
