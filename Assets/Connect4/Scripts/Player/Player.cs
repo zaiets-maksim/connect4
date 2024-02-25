@@ -41,7 +41,7 @@ public abstract class Player
         
         Debug.Log('\n');
         _currentTurnViewer.UpdateTurn($"{PlayerId} turn", Color);
-        Debug.Log($"<color=yellow>{PlayerId} ({PlayerId.GetType()}) </color> awaiting...");
+        Debug.Log($"<color=yellow>{PlayerId} ({GetType()}) </color> awaiting...");
 
         if (!IsHuman()) 
             ComputerTurn();
@@ -50,6 +50,7 @@ public abstract class Player
     private void ComputerTurn()
     {
         Vector2Int index = _turnCalculationsService.GetBestDecisionFor(this);
+        index = _gridService.TakeColumn(index.y);
         DoTurn(index);
         Debug.Log($"Best decision: {index}");
     }

@@ -27,8 +27,18 @@ public class GridService : IGridService
     public Cell GetCell(int x, int y) => Grid[x][y];
     public Cell GetCell(Vector2Int index) => Grid[index.x][index.y];
 
-    public void TakeCell(int x, int y, PlayerId state) => Grid[x][y].Take(state);
+    public void TakeCell(int x, int y, PlayerId id) => Grid[x][y].Take(id);
+
     public void ReleaseCell(int x, int y) => Grid[x][y].Release();
+
+    public Vector2Int TakeColumn(int index)
+    {
+        Columns[index].TakeElement();
+        return new Vector2Int(Columns[index].LastElementIndex, Columns[index].Index);
+    }
+
+    public void ReleaseColumn(int index) => Columns[index].ReleaseElement();
+
     public void Initialization(Cell[][] grid) => Grid = grid;
 
     public bool HasEmptyUnder(Cell cell, int count = 1) =>
@@ -50,13 +60,15 @@ public interface IGridService
 
     Cell[] GetRow(int number);
     Cell[] GetColumn(int number);
+    Vector2Int TakeColumn(int index);
+    void ReleaseColumn(int index);
 
     void Initialization(Cell[][] grid);
 
     Cell GetCell(int x, int y);
     Cell GetCell(Vector2Int index);
 
-    void TakeCell(int x, int y, PlayerId state);
+    void TakeCell(int x, int y, PlayerId id);
     void ReleaseCell(int x, int y);
 
     bool HasEmptyUnder(Cell cell, int count = 1);

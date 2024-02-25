@@ -36,7 +36,7 @@ namespace Connect4.Scripts.Strategies.IBlockingStrategy
 
                 if (verticalStreak == streak)
                 {
-                    indexes.Add(command.Index);
+                    indexes.Add(new Vector2Int(command.Index.x - 1, command.Index.y));
                     // Debug.Log($"verticalsStreak is {verticalStreak}");
                 }
             }

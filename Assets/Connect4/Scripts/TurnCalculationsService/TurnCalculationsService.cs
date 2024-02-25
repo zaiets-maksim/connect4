@@ -4,6 +4,7 @@ using Connect4.Scripts.Commands;
 using Connect4.Scripts.Services.VictoryCheckerService;
 using Connect4.Scripts.Strategies.IBlockingStrategy;
 using Connect4.Scripts.Turns;
+using Extensions;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -36,7 +37,7 @@ public class TurnCalculationsService : ITurnCalculationsService
             var commands = _commandHistoryService.GetMovesBy(activePlayer.PlayerId);
 
             if (commands.Count == 0)
-                return TakeColumn(GetRandomColumn());
+                return GetIndex(GetRandomColumn());
 
             var wonTurns = GetWonTurns(activePlayer);
             var blockOpponentTurns = GetBlockOpponentTurns();
@@ -44,80 +45,154 @@ public class TurnCalculationsService : ITurnCalculationsService
             if (wonTurns.Count > 0)
             {
                 Debug.Log("do won");
-                return TakeColumn(wonTurns[Random.Range(0, wonTurns.Count)].Index.y);
+                return GetIndex(wonTurns[Random.Range(0, wonTurns.Count)].Index.y);
             }
             
             if (blockOpponentTurns.Count > 0)
             {
                 Debug.Log("do block");
-                return TakeColumn(blockOpponentTurns[Random.Range(0, blockOpponentTurns.Count)].Index.y);
+                return GetIndex(blockOpponentTurns[Random.Range(0, blockOpponentTurns.Count)].Index.y);
             }
 
-            List<Turn> turns = new List<Turn>();
+            var buildTurns = new List<Turn>();
 
-            foreach (var column in _gridService.Columns)
-            {
-                var command = new MoveCommand(new Vector2Int(column.LastElementIndex, column.Index), activePlayer);
-                turns.AddRange(_verticalBuildingStrategy.GetIndexesToBuild(command));
-            }
-            
-            foreach (var command in commands)
-            {
-                turns.AddRange(_horizontalBuildingStrategy.GetIndexesToBuild(command));
-                turns.AddRange(_diagonalBuildingStrategy.GetIndexesToBuild(command));
-            }
+            buildTurns = GetBuildTurns(activePlayer, commands);
+            buildTurns = TryToRemoveDuplicates(buildTurns);
 
-            var bannedTurns = GetBannedTurns();
-            if (turns.Count == 0)
-            {
-                Debug.Log($"banned count: {bannedTurns.Count}");
-                return TakeColumn(GetRandomColumn());
-            }
+            var bannedTurns = TryToBanTurns(activePlayer, buildTurns);
 
-            turns.RemoveAll(turn => bannedTurns.Any(bannedTurn => bannedTurn.Index == turn.Index));
-            
-            int maxPriority = turns.Max(turn => turn.Priority);
-            
-            Turn randomTurn = turns
+            if (buildTurns.Count == 0)
+                return GetIndex(GetRandomColumn(bannedTurns));
+
+            if (_gridService.Columns.Count(x => x.HasFreeCell) > 1)
+                buildTurns.RemoveAll(turn => bannedTurns.Any(bannedTurn => bannedTurn.Index == turn.Index));
+
+
+            if (buildTurns.Count == 0)
+                return GetIndex(bannedTurns.Count > 0
+                    ? GetRandomColumnExcept(bannedTurns)
+                    : GetRandomColumn());
+
+
+            int maxPriority = buildTurns.Max(turn => turn.Priority);
+            Turn randomTurn = buildTurns
                 .Where(x => x.Priority == maxPriority)
                 .OrderBy(x => Random.value > 0.5f)
                 .FirstOrDefault();
-            
             Debug.Log("do build");
-
-            return TakeColumn(randomTurn.Index.y);
+            return GetIndex(randomTurn.Index.y);
         }
 
         Debug.Log("do random");
-        return TakeColumn(GetRandomColumn());
+        return GetIndex(GetRandomColumn());
     }
 
-    private List<Turn> GetBannedTurns()
+    private int GetRandomColumn(List<Turn> bannedTurns) =>
+        bannedTurns.Count > 0 
+            ? GetRandomColumnExcept(bannedTurns) 
+            : GetRandomColumn();
+
+    private int GetRandomColumn()
+    {
+        var columns = _gridService.Columns.Where(x => x.HasFreeCell).ToList();
+        return columns.Random().Index;
+    }
+    
+    private int GetRandomColumnExcept(List<Turn> bannedTurns)
+    {
+        var freeColumns = _gridService.Columns.Where(x => x.HasFreeCell).ToList();
+        var bannedColumns = bannedTurns.Select(x => x.Index.y).ToList();
+
+        if (freeColumns.Count - bannedColumns.Count <= 0)
+            return freeColumns.Random().Index;
+
+        var availableColumns = freeColumns
+            .Where(x => !bannedColumns.Contains(x.Index));
+            
+        return availableColumns.Random().Index;
+    }
+
+    private List<Turn> GetBuildTurns(Player activePlayer, List<ICommand> commands)
+    {
+        List<Turn> turns = new List<Turn>();
+        
+        foreach (var column in _gridService.Columns)
+        {
+            var command = new MoveCommand(new Vector2Int(column.LastElementIndex, column.Index), activePlayer);
+            turns.AddRange(_verticalBuildingStrategy.GetIndexesToBuild(command));
+        }
+
+        foreach (var command in commands)
+        {
+            turns.AddRange(_horizontalBuildingStrategy.GetIndexesToBuild(command));
+            turns.AddRange(_diagonalBuildingStrategy.GetIndexesToBuild(command));
+        }
+
+        return turns;
+    }
+
+    private List<Turn> TryToRemoveDuplicates(List<Turn> turns) => turns
+            .GroupBy(turn => turn.Index)
+            .Select(group => group.OrderByDescending(turn => turn.Priority).First())
+            .ToList();
+
+    private List<Turn> TryToBanTurns(Player activePlayer, List<Turn> turns)
+    {
+        var bannedTurns = GetBannedTurns(activePlayer);
+        turns.RemoveAll(x => _gridService.GetCell(x.Index).CellId != PlayerId.Empty); // for what?
+        
+        return bannedTurns;
+    }
+
+    private Vector2Int GetIndex(int index) => 
+        new Vector2Int(_gridService.Columns[index].LastElementIndex, index);
+
+    private List<Turn> GetBannedTurns(Player activePlayer)
     {
         List<Turn> commands = new List<Turn>();
         ICommand lastCommand = _commandHistoryService.Peek();
-        var activePlayer = lastCommand.ActivePlayer;
+        var opponent = lastCommand.ActivePlayer;
 
         for (var i = 0; i < _gridService.Columns.Count; i++)
         {
             if (_gridService.Columns[i].LastElementIndex <= 1)
                 continue;
-
-            var index = TakeColumn(i);
-            index = TakeColumn(i);
-
+            
+            
+            var index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
             SimulateTurn(index, activePlayer.PlayerId);
-
             if (_victoryCheckerService.TurnIsWin(index, activePlayer.PlayerId, out int priority))
             {
-                Debug.Log(new Vector2Int(index.x + 1, index.y));
-                var bannedCommand = new Turn(new Vector2Int(index.x + 1, index.y));
-                commands.Add(bannedCommand);
+                Debug.Log(new Vector2Int(index.x, index.y) + "yes!");
+                Debug.Log(new Vector2Int(index.x + 1, index.y) + "to bun!");
+                var bannedTurn = new Turn(new Vector2Int(index.x + 1, index.y));
+                commands.Add(bannedTurn);
             }
-
             CancelSimulate(index);
-            ReleaseColumn(i);
-            ReleaseColumn(i);
+            
+            
+            
+            index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
+            SimulateTurn(index, opponent.PlayerId);
+            if (_victoryCheckerService.TurnIsWin(index, opponent.PlayerId, out priority))
+            {
+                Debug.Log(new Vector2Int(index.x, index.y) + "yes!");
+                Debug.Log(new Vector2Int(index.x + 1, index.y) + "to bun!");
+                var bannedTurn = new Turn(new Vector2Int(index.x + 1, index.y));
+                commands.Add(bannedTurn);
+            }
+            CancelSimulate(index);
+
+            index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 2, i);
+            SimulateTurn(index, opponent.PlayerId);
+            if (_victoryCheckerService.TurnIsWin(index, opponent.PlayerId, out priority))
+            {
+                Debug.Log(new Vector2Int(index.x, index.y) + "yes!");
+                Debug.Log(new Vector2Int(index.x + 1, index.y) + "to bun!");
+                var bannedTurn = new Turn(new Vector2Int(index.x + 1, index.y));
+                commands.Add(bannedTurn);
+            }
+            CancelSimulate(index);
         }
 
         return commands;
@@ -137,7 +212,7 @@ public class TurnCalculationsService : ITurnCalculationsService
             // ShowRow(_gridService.Columns[i].LastElementIndex);
             // Debug.Log(new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, _gridService.Columns[i].Index));
 
-            var index = TakeColumn(i);
+            var index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
             SimulateTurn(index, activePlayer.PlayerId);
 
             // ShowRow(_gridService.Columns[i].LastElementIndex);
@@ -150,7 +225,6 @@ public class TurnCalculationsService : ITurnCalculationsService
             }
 
             CancelSimulate(index);
-            ReleaseColumn(i);
 
             // Debug.Log("\n");
         }
@@ -168,7 +242,7 @@ public class TurnCalculationsService : ITurnCalculationsService
             if (_gridService.Columns[i].LastElementIndex == 0)
                 continue;
 
-            var index = TakeColumn(i);
+            var index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
             SimulateTurn(index, player.PlayerId);
 
             if (_victoryCheckerService.TurnIsWin(index, activePlayer.PlayerId, out int priority))
@@ -178,58 +252,22 @@ public class TurnCalculationsService : ITurnCalculationsService
             }
 
             CancelSimulate(index);
-            ReleaseColumn(i);
             // Debug.Log(_gridService.GetCell(index).CellId);
         }
 
         return commands;
     }
-
-    private void ShowRow(int lastElementIndex)
+    
+    private void SimulateTurn(Vector2Int index, PlayerId playerId)
     {
-        Cell[] row = _gridService.GetRow(lastElementIndex - 1);
-        List<string> stringArray = row.Select(cell => cell.CellId.ToString()).ToList();
-
-        string arrayString = string.Join(" ", stringArray);
-        Debug.Log(arrayString);
-    }
-
-
-    private void SimulateTurn(Vector2Int index, PlayerId playerId) =>
         _gridService.TakeCell(index.x, index.y, playerId);
+        _gridService.TakeColumn(index.y);
+    }
 
-    private void CancelSimulate(Vector2Int index) =>
+    private void CancelSimulate(Vector2Int index)
+    {
         _gridService.ReleaseCell(index.x, index.y);
-
-    List<ICommand> RemoveCellsWithout(PlayerId playerId, List<ICommand> commands)
-    {
-        for (int i = commands.Count - 1; i >= 0; i--)
-            if (_gridService.GetCell(commands[i].Index.x, commands[i].Index.y).CellId != playerId)
-                commands.RemoveAt(i);
-
-        return commands;
-    }
-
-    private int GetRandomColumn()
-    {
-        var columns = _gridService.Columns.Where(x => x.HasFreeCell).ToList();
-        var randomColumn = Random.Range(0, columns.Count - 1);
-
-        return columns[randomColumn].Index;
-    }
-
-    private Vector2Int TakeColumn(int index)
-    {
-        var column = _gridService.Columns[index];
-        column.AddElement();
-
-        return new Vector2Int(column.LastElementIndex, column.Index);
-    }
-
-    private void ReleaseColumn(int index)
-    {
-        var column = _gridService.Columns[index];
-        column.RemoveElement();
+        _gridService.ReleaseColumn(index.y);
     }
 }
 
