@@ -1,3 +1,4 @@
+using System;
 using Infrastructure.Services.Factories.Game;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -15,6 +16,9 @@ public class GameCurator : IGameCurator
     private CurrentTurnViewer _currentTurnViewer => _gameFactory.Hud.CurrentTurnViewer;
 
     public Player ActivePlayer { get; private set; }
+    public GameMode GameMode { get; private set; }
+
+    public event Action OnSwitchPlayers;
 
     public GameCurator(IMoveVisualizer moveVisualizer, IGridService gridService, ITurnCalculationsService turnCalculationsService, 
         ICommandHistoryService commandHistoryService, IGameFactory gameFactory, IFinishService finishService)
@@ -57,19 +61,24 @@ public class GameCurator : IGameCurator
         
         SetActivePlayer(Random.value > 0.5f ? _player1 : _player2);
     }
-
-    private void SwitchPlayers() => 
-        SetActivePlayer(ActivePlayer == _player1 ? _player2 : _player1);
     
-    public void EndTurn()
+    public void EndTurn() => SwitchPlayers();
+    
+    public void Init(GameMode gameMode) => GameMode = gameMode;
+
+    private void SwitchPlayers()
     {
-        SwitchPlayers();
+        SetActivePlayer(ActivePlayer == _player1 ? _player2 : _player1);
+        OnSwitchPlayers?.Invoke();
     }
 }
 
 public interface IGameCurator
 {
+    event Action OnSwitchPlayers;
     Player ActivePlayer { get; }
+    GameMode GameMode { get; }
     void SetPlayers<T>(T player1, T player2) where T : Player;
     void EndTurn();
+    void Init(GameMode gameMode);
 }

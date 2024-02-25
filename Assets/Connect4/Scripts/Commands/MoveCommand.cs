@@ -42,9 +42,9 @@ namespace Connect4.Scripts.Commands
 
         public async void Undo()
         {
-            _commandHistoryService.Pop();
-            await _moveVisualizer.CancelTurn(Piece);
             _gridService.ReleaseCell(Index.x, Index.y);
+            _gridService.ReleaseColumn(Index.y);
+            await _moveVisualizer.CancelTurn(Piece);
         }
 
         public void ToHistory() => 

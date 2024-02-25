@@ -16,14 +16,10 @@ public class CommandHistoryService : ICommandHistoryService
 
     public bool HasCommands() => 
         _commandHistory.Count > 0;
-
-    // public List<T> GetMovesBy<T>(PlayerId playerId) where T : ICommand
-    // {
-    //     return new Stack<T>(_commandHistory
-    //             .Select(command => (T) command))
-    //         .Where(x => x.ActivePlayer.PlayerId == playerId).ToList();
-    // }
     
+    public int CommandsCount() => 
+        _commandHistory.Count;
+
     public List<ICommand> GetMovesBy(PlayerId playerId)
     {
         return new List<ICommand>(_commandHistory
@@ -38,6 +34,7 @@ public interface ICommandHistoryService
     ICommand Peek();
     ICommand Pop();
     bool HasCommands();
+    int CommandsCount();
     List<ICommand> GetMovesBy(PlayerId playerId);
     // List<T> GetMovesBy<T>(PlayerId playerId) where T : ICommand;
 }

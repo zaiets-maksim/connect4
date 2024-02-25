@@ -13,10 +13,12 @@ namespace Connect4.Scripts.UI.Buttons
         [SerializeField] private GameMode _gameMode;
 
         private IStateMachine<IGameState> _stateMachine;
+        private IGameCurator _gameCurator;
 
         [Inject]
-        public void Constructor(IStateMachine<IGameState> stateMachine)
+        public void Constructor(IStateMachine<IGameState> stateMachine, IGameCurator gameCurator)
         {
+            _gameCurator = gameCurator;
             _stateMachine = stateMachine;
         }
 
@@ -33,14 +35,15 @@ namespace Connect4.Scripts.UI.Buttons
             };
 
             _stateMachine.Enter<LoadLevelState, Tuple<Player, Player>>(players);
-        }
-
-        private enum GameMode
-        {
-            HumanVsHuman,
-            HumanVsComputer,
-            ComputerVsComputer
+            _gameCurator.Init(_gameMode);
         }
     }
+}
+
+public enum GameMode
+{
+    HumanVsHuman,
+    HumanVsComputer,
+    ComputerVsComputer
 }
 
