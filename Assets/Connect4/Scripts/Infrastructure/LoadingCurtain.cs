@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -11,6 +12,8 @@ namespace Connect4.Scripts.Infrastructure
         public Image Image;
         public float MoveUpSpeed = 20f;
         public float TimeStep = 0.03f;
+
+        public event Action OnComplete;
 
         private void Awake()
         {
@@ -36,6 +39,7 @@ namespace Connect4.Scripts.Infrastructure
                 yield return new WaitForSeconds(TimeStep);
             }
 
+            OnComplete?.Invoke();
             gameObject.SetActive(false);
         }
 
