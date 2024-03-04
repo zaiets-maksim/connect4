@@ -7,12 +7,17 @@ namespace Connect4.Scripts.Strategies.Win
 {
     public class HorizontalWinStrategy : IWinningStrategy
     {
+        private readonly IGridService _gridService;
+
+        public HorizontalWinStrategy(IGridService gridService) => 
+            _gridService = gridService;
+
         public List<Vector2Int> FourInLine { get; } = new List<Vector2Int>();
 
-        public bool IsWinningMove(IGridService gridService, Vector2Int index, PlayerId playerId)
+        public bool IsWinningMove(Vector2Int index, PlayerId playerId)
         {
-            int width = gridService.Width;
-            var row = gridService.GetRow(index.x);
+            int width = _gridService.Width;
+            var row = _gridService.GetRow(index.x);
             
             Vector2Int startIndex = GetStartIndex(row, index, playerId);
             int cellsAhead = width - 1 - startIndex.y;
@@ -21,8 +26,6 @@ namespace Connect4.Scripts.Strategies.Win
                 return false;
 
             var result = FourInRaw(row, startIndex, playerId);
-            // if (result) 
-            //     Debug.Log($"<color=green>{playerId} </color> win!");
 
             return result;
         }

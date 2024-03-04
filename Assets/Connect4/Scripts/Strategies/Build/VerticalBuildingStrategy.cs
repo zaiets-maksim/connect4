@@ -63,10 +63,7 @@ namespace Connect4.Scripts.Strategies.Build
                 ++counter;
             }
 
-            if(startIndex.x >= 3)
-                return counter;
-
-            return 0;
+            return startIndex.x >= 3 ? counter : 0;
         }
     }
 }

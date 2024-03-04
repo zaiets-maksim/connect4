@@ -7,21 +7,23 @@ namespace Connect4.Scripts.Strategies.Win
 {
     public class VerticalWinStrategy : IWinningStrategy
     {
+        private readonly IGridService _gridService;
+
+        public VerticalWinStrategy(IGridService gridService) => 
+            _gridService = gridService;
+
         public List<Vector2Int> FourInLine { get; } = new List<Vector2Int>();
 
-        public bool IsWinningMove(IGridService gridService, Vector2Int index, PlayerId playerId)
+        public bool IsWinningMove(Vector2Int index, PlayerId playerId)
         {
-            int height = gridService.Height;
+            int height = _gridService.Height;
 
             if (index.x > height - 4)
                 return false;
 
-            var column = gridService.GetColumn(index.y);
+            var column = _gridService.GetColumn(index.y);
             var result = FourInColumn(column, index.x, playerId);
 
-            // if(result)
-            //     Debug.Log($"<color=green>{playerId} </color> win!");
-            
             return result;
         }
         

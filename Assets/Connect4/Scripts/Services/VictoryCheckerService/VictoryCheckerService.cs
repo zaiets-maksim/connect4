@@ -9,15 +9,21 @@ namespace Connect4.Scripts.Services.VictoryCheckerService
 {
     public class VictoryCheckerService : IVictoryCheckerService
     {
-        private readonly VerticalWinStrategy _verticalWinStrategy = new VerticalWinStrategy();
-        private readonly HorizontalWinStrategy _horizontalWinStrategy = new HorizontalWinStrategy();
-        private readonly DiagonalWinStrategy _diagonalWinStrategy = new DiagonalWinStrategy();
+        private readonly VerticalWinStrategy _verticalWinStrategy;
+        private readonly HorizontalWinStrategy _horizontalWinStrategy;
+        private readonly DiagonalWinStrategy _diagonalWinStrategy;
 
         private readonly IGridService _gridService;
         private List<IWinningStrategy> _wonStrategies;
 
-        public VictoryCheckerService(IGridService gridService) =>
+        public VictoryCheckerService(IGridService gridService)
+        {
             _gridService = gridService;
+            
+            _verticalWinStrategy = new VerticalWinStrategy(_gridService);
+            _horizontalWinStrategy = new HorizontalWinStrategy(_gridService);
+            _diagonalWinStrategy = new DiagonalWinStrategy(_gridService);
+        }
 
         public bool TurnIsWin(Vector2Int index, PlayerId playerId)
         {
@@ -29,7 +35,7 @@ namespace Connect4.Scripts.Services.VictoryCheckerService
             };
 
             _wonStrategies = strategies
-                .Where(strategy => strategy.IsWinningMove(_gridService, index, playerId))
+                .Where(strategy => strategy.IsWinningMove(index, playerId))
                 .ToList();
 
             return _wonStrategies.Count > 0;
@@ -40,9 +46,9 @@ namespace Connect4.Scripts.Services.VictoryCheckerService
         {
             counter = 0;
 
-            counter += _verticalWinStrategy.IsWinningMove(_gridService, index, playerId) ? 1 : 0;
-            counter += _horizontalWinStrategy.IsWinningMove(_gridService, index, playerId) ? 1 : 0;
-            counter += _diagonalWinStrategy.IsWinningMove(_gridService, index, playerId) ? 1 : 0;
+            counter += _verticalWinStrategy.IsWinningMove(index, playerId) ? 1 : 0;
+            counter += _horizontalWinStrategy.IsWinningMove(index, playerId) ? 1 : 0;
+            counter += _diagonalWinStrategy.IsWinningMove(index, playerId) ? 1 : 0;
 
             return counter > 0;
         }

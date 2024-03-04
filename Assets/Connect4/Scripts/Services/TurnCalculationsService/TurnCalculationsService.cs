@@ -61,12 +61,17 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
                 var buildTurns = new List<Turn>();
 
                 buildTurns = GetBuildTurns(activePlayer, commands);
+
+
                 buildTurns = TryToRemoveDuplicates(buildTurns);
 
                 var bannedTurns = TryToBanTurns(activePlayer, buildTurns);
 
                 if (buildTurns.Count == 0)
+                {
+                    Debug.Log("do random");
                     return GetIndex(GetRandomColumn(bannedTurns));
+                }
 
                 if (_gridService.Columns.Count(x => x.HasFreeCell) > 1)
                     buildTurns.RemoveAll(turn => bannedTurns.Any(bannedTurn => bannedTurn.Index == turn.Index));
@@ -131,6 +136,9 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
                 turns.AddRange(_horizontalBuildingStrategy.GetIndexesToBuild(command));
                 turns.AddRange(_diagonalBuildingStrategy.GetIndexesToBuild(command));
             }
+            
+            Debug.Log("build turns:");
+            turns.ForEach(x => Debug.Log(x.Index));
 
             return turns;
         }
@@ -161,45 +169,37 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
             {
                 if (_gridService.Columns[i].LastElementIndex <= 1)
                     continue;
-            
-            
-                var index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
-                SimulateTurn(index, activePlayer.PlayerId);
-                if (_victoryCheckerService.TurnIsWin(index, activePlayer.PlayerId, out int priority))
-                {
-                    Debug.Log(new Vector2Int(index.x, index.y) + "yes!");
-                    Debug.Log(new Vector2Int(index.x + 1, index.y) + "to bun!");
-                    var bannedTurn = new Turn(new Vector2Int(index.x + 1, index.y));
+                
+                if (TurnNeedToBun(activePlayer, new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i), out Turn bannedTurn))
                     commands.Add(bannedTurn);
-                }
-                CancelSimulate(index);
-            
-            
-            
-                index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
-                SimulateTurn(index, opponent.PlayerId);
-                if (_victoryCheckerService.TurnIsWin(index, opponent.PlayerId, out priority))
-                {
-                    Debug.Log(new Vector2Int(index.x, index.y) + "yes!");
-                    Debug.Log(new Vector2Int(index.x + 1, index.y) + "to bun!");
-                    var bannedTurn = new Turn(new Vector2Int(index.x + 1, index.y));
-                    commands.Add(bannedTurn);
-                }
-                CancelSimulate(index);
 
-                index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 2, i);
-                SimulateTurn(index, opponent.PlayerId);
-                if (_victoryCheckerService.TurnIsWin(index, opponent.PlayerId, out priority))
-                {
-                    Debug.Log(new Vector2Int(index.x, index.y) + "yes!");
-                    Debug.Log(new Vector2Int(index.x + 1, index.y) + "to bun!");
-                    var bannedTurn = new Turn(new Vector2Int(index.x + 1, index.y));
+                if (TurnNeedToBun(opponent, new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i), out bannedTurn))
                     commands.Add(bannedTurn);
-                }
-                CancelSimulate(index);
+
+                if (TurnNeedToBun(opponent, new Vector2Int(_gridService.Columns[i].LastElementIndex - 2, i), out bannedTurn))
+                    commands.Add(bannedTurn);
             }
 
             return commands;
+        }
+
+        private bool TurnNeedToBun(Player.Player player, Vector2Int index, out Turn bannedTurn)
+        {
+            bannedTurn = new Turn(new Vector2Int());
+
+            SimulateTurn(index, player.PlayerId);
+            if (_victoryCheckerService.TurnIsWin(index, player.PlayerId, out int priority))
+            {
+                Debug.Log(new Vector2Int(index.x, index.y) + "yes!");
+                Debug.Log(new Vector2Int(index.x + 1, index.y) + "to bun!");
+                bannedTurn = new Turn(new Vector2Int(index.x + 1, index.y));
+                CancelSimulate(index);
+
+                return true;
+            }
+            CancelSimulate(index);
+
+            return false;
         }
 
         private List<Turn> GetBlockOpponentTurns()
@@ -213,24 +213,17 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
                 if (_gridService.Columns[i].LastElementIndex == 0)
                     continue;
 
-                // ShowRow(_gridService.Columns[i].LastElementIndex);
-                // Debug.Log(new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, _gridService.Columns[i].Index));
-
                 var index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
                 SimulateTurn(index, activePlayer.PlayerId);
-
-                // ShowRow(_gridService.Columns[i].LastElementIndex);
+                
 
                 if (_victoryCheckerService.TurnIsWin(index, activePlayer.PlayerId, out int priority))
                 {
-                    // Debug.Log("to block");
                     var winedCommand = new Turn(index);
                     commands.Add(winedCommand);
                 }
 
                 CancelSimulate(index);
-
-                // Debug.Log("\n");
             }
 
             return commands;
@@ -256,7 +249,6 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
                 }
 
                 CancelSimulate(index);
-                // Debug.Log(_gridService.GetCell(index).CellId);
             }
 
             return commands;
