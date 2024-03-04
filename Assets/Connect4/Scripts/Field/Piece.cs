@@ -7,29 +7,22 @@ namespace Connect4.Scripts.Field
     public class Piece : MonoBehaviour
     {
         [SerializeField] private SpriteRenderer _spriteRenderer;
-    
-        public Task MoveTo(Vector2 position, float duration)
+
+        public async Task MoveTo(Vector2 position, float duration)
         {
-            TaskCompletionSource<Transform> tcs = new TaskCompletionSource<Transform>();
-            transform.DOMove(position, duration).onComplete += () =>
-                tcs.SetResult(null);
-        
-            return tcs.Task;
+            transform.DOMove(position, duration);
+            await Task.Delay((int)(duration * 1000f));
+            
+            // Task task = transform.DOMove(position, duration).AsyncWaitForCompletion();
+            // await task;
         }
 
-        public async Task Hide()
+        public async Task Hide(float duration)
         {
-            TaskCompletionSource<Transform> tcs = new TaskCompletionSource<Transform>();
-            _spriteRenderer.DOColor(Color.clear, 0.25f).onComplete += () =>
-                tcs.SetResult(null);
-
-            await tcs.Task;
+            _spriteRenderer.DOColor(Color.clear, duration);
+            await Task.Delay((int)(duration * 1000f));
+            
             gameObject.SetActive(false);
-        }
-
-        public void Highlight()
-        {
-        
         }
 
         public void SetColor(Color color) => 

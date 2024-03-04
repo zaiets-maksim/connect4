@@ -40,16 +40,6 @@ namespace Connect4.Scripts.Services.GameCurator
             _moveVisualizer = moveVisualizer;
         }
 
-        private void SetActivePlayer(Player.Player player)
-        {
-            _player1.IsReady = false;
-            _player2.IsReady = false;
-
-            ActivePlayer = player;
-        
-            ActivePlayer.AwaitTurn();
-        }
-
         public void SetPlayers<T>(T player1, T player2) where T : Player.Player
         {
             _player1 = player1;
@@ -67,18 +57,42 @@ namespace Connect4.Scripts.Services.GameCurator
             _player2.Initialize(
                 this, _moveVisualizer, _gridService, _turnCalculationsService,
                 _commandHistoryService, _currentTurnViewer, _finishService, PlayerId.Player2, color2);
-        
+            
+            BindToColumnClick();
+
             SetActivePlayer(Random.value > 0.5f ? _player1 : _player2);
         }
     
         public void EndTurn() => SwitchPlayers();
     
         public void Init(GameMode gameMode) => GameMode = gameMode;
+        
+        private void SetActivePlayer(Player.Player player)
+        {
+            _player1.IsReady = false;
+            _player2.IsReady = false;
 
+            ActivePlayer = player;
+        
+            ActivePlayer.AwaitTurn();
+        }
+        
         private void SwitchPlayers()
         {
             SetActivePlayer(ActivePlayer == _player1 ? _player2 : _player1);
             OnSwitchPlayers?.Invoke();
+        }
+        
+        private void BindToColumnClick()
+        {
+            foreach (var column in _gridService.Columns) 
+                column.OnClick += ProcessHumanTurn;
+        }
+
+        private void ProcessHumanTurn(Vector2Int index)
+        {
+            if (ActivePlayer.IsHuman()) 
+                ActivePlayer.DoTurn(index);
         }
     }
 

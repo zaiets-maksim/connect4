@@ -20,12 +20,13 @@ namespace Connect4.Scripts.Services.MoveVisualizer
             var piece = _gameFactory.CreatePiece(new Vector2(position.x, 5f), command.ActivePlayer.Color);
             var task = piece.MoveTo(position, 0.25f);
             command.Piece = piece;
+            
             await task;
         }
 
         public async Task CancelTurn(Piece piece)
         {
-            await piece.Hide();
+            await piece.Hide(0.5f);
         }
     }
 

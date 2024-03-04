@@ -1,6 +1,7 @@
 ﻿using System;
 using Connect4.Scripts.Infrastructure;
 using Connect4.Scripts.Player;
+using Connect4.Scripts.Services.CommandHistoryService;
 using Connect4.Scripts.Services.Factories.Game;
 using Connect4.Scripts.Services.Factories.UIFactory;
 using Connect4.Scripts.Services.FinishService;
@@ -24,15 +25,17 @@ namespace Infrastructure.StateMachine.Game.States
         private readonly IVictoryCheckerService _victoryCheckerService;
         private readonly IVictoryVisualizer _victoryVisualizer;
         private readonly IFinishService _finishService;
-        
+        private readonly ICommandHistoryService _commandHistoryService;
+
         private Tuple<Player, Player> _players;
 
         [Inject]
         public LoadLevelState(IStateMachine<IGameState> gameStateMachine, ISceneLoader sceneLoader,
             ILoadingCurtain loadingCurtain, IUIFactory uiFactory, IGameFactory gameFactory, IGameCurator gameCurator,
             IGridService gridService, IVictoryCheckerService victoryCheckerService,
-            IVictoryVisualizer victoryVisualizer, IFinishService finishService)
+            IVictoryVisualizer victoryVisualizer, IFinishService finishService, ICommandHistoryService commandHistoryService)
         {
+            _commandHistoryService = commandHistoryService;
             _finishService = finishService;
             _victoryVisualizer = victoryVisualizer;
             _victoryCheckerService = victoryCheckerService;
@@ -78,6 +81,7 @@ namespace Infrastructure.StateMachine.Game.States
         private void Clear()
         {
             _gridService.Clear();
+            _commandHistoryService.Clear();
         }
     }
 }

@@ -1,3 +1,4 @@
+using System;
 using Connect4.Scripts.Services.GameCurator;
 using UnityEngine;
 
@@ -6,11 +7,13 @@ namespace Connect4.Scripts.Field
     public class Column : MonoBehaviour
     {
         private int _index;
-        private int _lastElementIndex = 0;
+        private int _lastElementIndex;
 
         private IGameCurator _gameCurator;
+        
+        public event Action<Vector2Int> OnClick;
+        
         public int Index => _index;
-
         public int LastElementIndex
         {
             get => _lastElementIndex;
@@ -28,18 +31,15 @@ namespace Connect4.Scripts.Field
 
         private void OnMouseUp()
         {
-            if(CanTurn())
-                DoTurn();
+            if (HumanCanTurn())
+            {
+                TakeElement();
+                OnClick?.Invoke(new Vector2Int(LastElementIndex, _index));
+            }
         }
 
-        private bool CanTurn() => 
+        private bool HumanCanTurn() => 
             LastElementIndex > 0 && _gameCurator.ActivePlayer.IsHuman() && _gameCurator.ActivePlayer.IsReady;
-
-        private void DoTurn()
-        {
-            TakeElement();
-            _gameCurator.ActivePlayer.DoTurn(new Vector2Int(LastElementIndex, _index));
-        }
 
         public void TakeElement() => 
             --LastElementIndex;

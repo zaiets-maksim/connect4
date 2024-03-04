@@ -27,9 +27,11 @@ namespace Connect4.Scripts.Services.CommandHistoryService
         public List<ICommand> GetMovesBy(PlayerId playerId)
         {
             return new List<ICommand>(_commandHistory
-                    .Select(command => command))
+                .Select(command => command))
                 .Where(x => x.ActivePlayer.PlayerId == playerId).ToList();
         }
+
+        public void Clear() => _commandHistory.Clear();
     }
 
     public interface ICommandHistoryService
@@ -41,5 +43,6 @@ namespace Connect4.Scripts.Services.CommandHistoryService
         int CommandsCount();
         List<ICommand> GetMovesBy(PlayerId playerId);
         // List<T> GetMovesBy<T>(PlayerId playerId) where T : ICommand;
+        void Clear();
     }
 }
