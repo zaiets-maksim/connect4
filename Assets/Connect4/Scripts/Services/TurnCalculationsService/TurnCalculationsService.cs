@@ -136,9 +136,6 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
                 turns.AddRange(_horizontalBuildingStrategy.GetIndexesToBuild(command));
                 turns.AddRange(_diagonalBuildingStrategy.GetIndexesToBuild(command));
             }
-            
-            Debug.Log("build turns:");
-            turns.ForEach(x => Debug.Log(x.Index));
 
             return turns;
         }
