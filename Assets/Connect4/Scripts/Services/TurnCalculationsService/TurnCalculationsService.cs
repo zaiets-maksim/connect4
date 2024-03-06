@@ -43,7 +43,7 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
                 if (commands.Count == 0)
                     return GetIndex(GetRandomColumn());
 
-                var wonTurns = GetWonTurns(activePlayer);
+                var wonTurns = GetWonTurns(activePlayer.PlayerId);
                 var blockOpponentTurns = GetBlockOpponentTurns();
 
                 if (wonTurns.Count > 0)
@@ -201,35 +201,20 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
 
         private List<Turn> GetBlockOpponentTurns()
         {
-            List<Turn> commands = new List<Turn>();
             ICommand lastCommand = _commandHistoryService.Peek();
-            var activePlayer = lastCommand.ActivePlayer;
+            PlayerId playerId = lastCommand.ActivePlayer.PlayerId;
 
-            for (var i = 0; i < _gridService.Columns.Count; i++)
-            {
-                if (_gridService.Columns[i].LastElementIndex == 0)
-                    continue;
-
-                var index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
-                SimulateTurn(index, activePlayer.PlayerId);
-                
-
-                if (_victoryCheckerService.TurnIsWin(index, activePlayer.PlayerId, out int priority))
-                {
-                    var winedCommand = new Turn(index);
-                    commands.Add(winedCommand);
-                }
-
-                CancelSimulate(index);
-            }
-
-            return commands;
+            return GetTurns(playerId);
+        }
+        
+        private List<Turn> GetWonTurns(PlayerId playerId)
+        {
+            return GetTurns(playerId);
         }
 
-        private List<Turn> GetWonTurns(Player.Player player)
+        private List<Turn> GetTurns(PlayerId playerId)
         {
-            List<Turn> commands = new List<Turn>();
-            var activePlayer = player;
+            List<Turn> turns = new List<Turn>();
 
             for (var i = 0; i < _gridService.Columns.Count; i++)
             {
@@ -237,18 +222,15 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
                     continue;
 
                 var index = new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i);
-                SimulateTurn(index, player.PlayerId);
+                SimulateTurn(index, playerId);
 
-                if (_victoryCheckerService.TurnIsWin(index, activePlayer.PlayerId, out int priority))
-                {
-                    var winedCommand = new Turn(index, priority);
-                    commands.Add(winedCommand);
-                }
+                if (_victoryCheckerService.TurnIsWin(index, playerId, out int priority))
+                    turns.Add(new Turn(index));
 
                 CancelSimulate(index);
             }
 
-            return commands;
+            return turns;
         }
     
         private void SimulateTurn(Vector2Int index, PlayerId playerId)
