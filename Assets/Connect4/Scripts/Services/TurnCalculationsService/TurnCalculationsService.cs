@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Connect4.Scripts.Commands;
 using Connect4.Scripts.Extensions;
 using Connect4.Scripts.Field;
@@ -34,71 +35,360 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
             _diagonalBuildingStrategy = new DiagonalBuildingStrategy(_gridService);
         }
 
+        public int Depth { get; set; } = 3;
+        public bool UseStandardMiniMax { get; set; }
+
+        private PlayerId _aiPlayer;
+        private PlayerId _opponent;
+
         public Vector2Int GetBestDecisionFor(Player.Player activePlayer)
         {
-            if (_commandHistoryService.HasCommands())
+            _aiPlayer = activePlayer.PlayerId;
+            _opponent = _aiPlayer == PlayerId.Player1 ? PlayerId.Player2 : PlayerId.Player1;
+
+            var board = _gridService.CloneGrid();
+
+            var x = Task.Run(() => GetNextMove(board)).Result;
+
+            return GetIndex(x);
+        }
+        
+        public int GetNextMove(Cell[][] board)
+        {
+            if (UseStandardMiniMax)
             {
-                var commands = _commandHistoryService.GetMovesBy(activePlayer.PlayerId);
-
-                if (commands.Count == 0)
-                    return GetIndex(GetRandomColumn());
-
-                var wonTurns = GetWonTurns(activePlayer.PlayerId);
-                var blockOpponentTurns = GetBlockOpponentTurns();
-
-                if (wonTurns.Count > 0)
-                {
-                    Debug.Log("do won");
-                    return GetIndex(wonTurns[Random.Range(0, wonTurns.Count)].Index.y);
-                }
-            
-                if (blockOpponentTurns.Count > 0)
-                {
-                    Debug.Log("do block");
-                    return GetIndex(blockOpponentTurns[Random.Range(0, blockOpponentTurns.Count)].Index.y);
-                }
-
-                var buildTurns = new List<Turn>();
-
-                buildTurns = GetBuildTurns(activePlayer, commands);
-
-
-                buildTurns = TryToRemoveDuplicates(buildTurns);
-
-                var bannedTurns = TryToBanTurns(activePlayer, buildTurns);
-
-                if (buildTurns.Count == 0)
-                {
-                    Debug.Log("do random");
-                    return GetIndex(GetRandomColumn(bannedTurns));
-                }
-
-                if (_gridService.Columns.Count(x => x.HasFreeCell) > 1)
-                    buildTurns.RemoveAll(turn => bannedTurns.Any(bannedTurn => bannedTurn.Index == turn.Index));
-
-
-                if (buildTurns.Count == 0)
-                    return GetIndex(bannedTurns.Count > 0
-                        ? GetRandomColumnExcept(bannedTurns)
-                        : GetRandomColumn());
-
-
-                int maxPriority = buildTurns.Max(turn => turn.Priority);
-                Turn randomTurn = buildTurns
-                    .Where(x => x.Priority == maxPriority)
-                    .OrderBy(x => Random.value > 0.5f)
-                    .FirstOrDefault();
-                Debug.Log("do build");
-                return GetIndex(randomTurn.Index.y);
+                var (column, score) = MinimaxStandard(board, Depth, true);
+                return column;
             }
-
-            Debug.Log("do random");
-            return GetIndex(GetRandomColumn());
+            else
+            {
+                var (column, score) = Minimax(board, Depth, int.MinValue, int.MaxValue, true);
+                return column;
+            }
         }
 
+        private bool PlayerWon(Cell[][] board, PlayerId player)
+        {
+            for (var i = 0; i < board.Length; i++)
+            {
+                for (var j = 0; j < board[i].Length; j++)
+                {
+                    if (_victoryCheckerService.TurnIsWin(new Vector2Int(i, j), player))
+                        return true;
+                }
+            }
+
+            return false;
+        }
+
+        private int MakeMove(Cell[][] board, int column, PlayerId currentPlayer)
+        {
+            if (board[0][column].CellId != PlayerId.Empty)
+            {
+                return -1;
+            }
+
+            var row = board.GetLength(0) - 1;
+            while (board[row][column].CellId != PlayerId.Empty)
+            {
+                row--;
+            }
+
+            board[row][column].CellId = currentPlayer;
+
+            return row;
+        }
+        
+        private void UndoMove(Cell[][] board, int column)
+        {
+            //empty column
+            if (board[board.GetLength(0) - 1][column].CellId == PlayerId.Empty)
+                return;
+
+            var row = 0;
+            while (board[row][column].CellId == PlayerId.Empty)
+            {
+                row++;
+            }
+
+            board[row][column].CellId = PlayerId.Empty;
+        }
+
+        private (int col, int score) Minimax(Cell[][] board, int depth, int alpha, int beta, bool isMaximizingPlayer)
+        {
+            var terminalNode = TerminalNode(board);
+            if (depth == 0 || terminalNode)
+            {
+                if (!terminalNode)
+                    return (-1, EvaluateBoard(board));
+                if (PlayerWon(board, _aiPlayer))
+                    return (-1, 4000000);
+                if (PlayerWon(board, _opponent))
+                    return (-1, -4000000);
+
+                return (-1, 0);
+            }
+
+            var height = _gridService.Height;
+            var length = _gridService.Width;
+
+            if (isMaximizingPlayer)
+            {
+                var bestScore = int.MinValue;
+                var bestColumn = 0;
+                for (var column = 0; column < length; column++)
+                {
+                    var result = MakeMove(board, column, _aiPlayer);
+                    if (result == -1)
+                        continue;
+
+                    var newScore = Minimax(board, depth - 1, alpha, beta, false).score;
+                    if (newScore > bestScore)
+                    {
+                        bestColumn = column;
+                        bestScore = newScore;
+                    }
+
+                    UndoMove(board, column);
+                    alpha = Mathf.Max(alpha, bestScore);
+                    if (beta <= alpha)
+                    {
+                        break;
+                    }
+                }
+
+                return (bestColumn, bestScore);
+            }
+            else
+            {
+                var bestScore = int.MaxValue;
+                var bestColumn = 0;
+                for (var column = 0; column < length; column++)
+                {
+                    var result = MakeMove(board, column, _opponent);
+                    if (result == -1)
+                        continue;
+
+                    var newScore = Minimax(board, depth - 1, alpha, beta, true).score;
+                    if (newScore < bestScore)
+                    {
+                        bestColumn = column;
+                        bestScore = newScore;
+                    }
+
+                    UndoMove(board, column);
+                    beta = Mathf.Min(beta, bestScore);
+                    if (beta <= alpha)
+                    {
+                        break;
+                    }
+                }
+
+                return (bestColumn, bestScore);
+            }
+        }
+
+        private (int col, int score) MinimaxStandard(Cell[][] board, int depth, bool isMaximizingPlayer)
+        {
+            var terminalNode = TerminalNode(board);
+            if (depth == 0 || terminalNode)
+            {
+                if (!terminalNode)
+                    return (-1, EvaluateBoard(board));
+                if (PlayerWon(board, _aiPlayer))
+                    return (-1, 4000000);
+                if (PlayerWon(board, _opponent))
+                    return (-1, -4000000);
+
+                return (-1, 0);
+            }
+
+            var height = _gridService.Height;
+            var length = _gridService.Width;
+
+            if (isMaximizingPlayer)
+            {
+                var bestScore = int.MinValue;
+                var bestColumn = 0;
+                for (var column = 0; column < length; column++)
+                {
+                    var result = MakeMove(board, column, _aiPlayer);
+                    if (result == -1)
+                        continue;
+
+                    var newScore = MinimaxStandard(board, depth - 1, false).score;
+                    if (newScore > bestScore)
+                    {
+                        bestColumn = column;
+                        bestScore = newScore;
+                    }
+
+                    UndoMove(board, column);
+                }
+
+                return (bestColumn, bestScore);
+            }
+            else
+            {
+                var bestScore = int.MaxValue;
+                var bestColumn = 0;
+                for (var column = 0; column < length; column++)
+                {
+                    var result = MakeMove(board, column, _opponent);
+                    if (result == -1)
+                        continue;
+
+                    var newScore = MinimaxStandard(board, depth - 1, true).score;
+                    if (newScore < bestScore)
+                    {
+                        bestColumn = column;
+                        bestScore = newScore;
+                    }
+
+                    UndoMove(board, column);
+                }
+
+                return (bestColumn, bestScore);
+            }
+        }
+
+        private int GetEmptyRowNumber(Cell[][] board, int column)
+        {
+            var row = board.GetLength(0) - 1;
+            while (board[row][column].CellId != PlayerId.Empty)
+            {
+                row--;
+
+                if (row == -1)
+                {
+                    return -1;
+                }
+            }
+
+            return row;
+        }
+        
+        private bool TerminalNode(Cell[][] board)
+        {
+            if (PlayerWon(board, _aiPlayer) || PlayerWon(board, _opponent))
+                return true;
+
+            var list = new List<int>();
+            for (var i = 0; i < board.Length; i++)
+            {
+                list.Add(GetEmptyRowNumber(board, i));
+            }
+
+            return list.All(x => x == -1);
+        }
+
+        private int EvaluateBoard(Cell[][] board)
+        {
+            var score = 0;
+            var rows = board.Length;
+            var cols = board[0].Length;
+
+            // Prefer center column
+            for (var i = 0; i < rows; i++)
+            {
+                if (board[i][(int) Mathf.Floor(cols / 2.0f)].CellId == _aiPlayer)
+                    score += 4;
+            }
+
+            var listSize = 4;
+            //Score horizontals
+            for (var i = 0; i < rows; i++)
+            {
+                var row = board[i].ToList();
+
+                for (int c = 0; c < row.Count - listSize + 1; c++)
+                {
+                    score += Evaluate4Elements(row.Skip(c).Take(listSize).Select(x => x.CellId).ToList());
+                }
+            }
+
+            //Score vertical
+            for (var i = 0; i < cols; i++)
+            {
+                var column = board.Select(row => row[i].CellId).ToList();
+
+                for (int r = 0; r < column.Count - listSize + 1; r++)
+                {
+                    score += Evaluate4Elements(column.Skip(r).Take(listSize).ToList());
+                }
+            }
+
+            // diagonals
+            for (var i = -cols + 3; i < rows - 2; i++)
+            {
+                var diagonal = new List<PlayerId>();
+
+                for (var row = 0; row < rows; row++)
+                {
+                    var col = row - i;
+
+                    if (col >= 0 && col < cols) 
+                        diagonal.Add(board[row][col].CellId);
+                }
+
+                for (var j = 0; j < diagonal.Count - listSize + 1; j++)
+                {
+                    score += Evaluate4Elements(diagonal.Skip(j).Take(listSize).ToList());
+                }
+            }
+
+            // anti diagonals
+            for (var i = 3; i < rows + cols - 4; i++)
+            {
+                var diagonal = new List<PlayerId>();
+
+                for (var row = 0; row < rows; row++)
+                {
+                    var col = i - row;
+
+                    if (col >= 0 && col < cols) 
+                        diagonal.Add(board[row][col].CellId);
+                }
+
+                for (var j = 0; j < diagonal.Count - listSize + 1; j++)
+                {
+                    score += Evaluate4Elements(diagonal.Skip(j).Take(listSize).ToList());
+                }
+            }
+
+            return score;
+        }
+
+        private int Evaluate4Elements(List<PlayerId> list)
+        {
+            var score = 0;
+
+            var aiCount = list.Count(x => x == _aiPlayer);
+            var emptyCount = list.Count(x => x == PlayerId.Empty);
+
+            switch (aiCount)
+            {
+                case 4:
+                    score += 1000;
+                    break;
+                case 3 when emptyCount == 1:
+                    score += 10;
+                    break;
+                case 2 when emptyCount == 2:
+                    score += 5;
+                    break;
+            }
+
+            if (list.Count(x => x == _opponent) == 2 && emptyCount == 2)
+                score -= 9;
+
+            return score;
+        }
+
+
         private int GetRandomColumn(List<Turn> bannedTurns) =>
-            bannedTurns.Count > 0 
-                ? GetRandomColumnExcept(bannedTurns) 
+            bannedTurns.Count > 0
+                ? GetRandomColumnExcept(bannedTurns)
                 : GetRandomColumn();
 
         private int GetRandomColumn()
@@ -106,7 +396,7 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
             var columns = _gridService.Columns.Where(x => x.HasFreeCell).ToList();
             return columns.Random().Index;
         }
-    
+
         private int GetRandomColumnExcept(List<Turn> bannedTurns)
         {
             var freeColumns = _gridService.Columns.Where(x => x.HasFreeCell).ToList();
@@ -117,14 +407,14 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
 
             var availableColumns = freeColumns
                 .Where(x => !bannedColumns.Contains(x.Index));
-            
+
             return availableColumns.Random().Index;
         }
 
         private List<Turn> GetBuildTurns(Player.Player activePlayer, List<ICommand> commands)
         {
             List<Turn> turns = new List<Turn>();
-        
+
             foreach (var column in _gridService.Columns)
             {
                 var command = new MoveCommand(new Vector2Int(column.LastElementIndex, column.Index), activePlayer);
@@ -149,11 +439,11 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
         {
             var bannedTurns = GetBannedTurns(activePlayer);
             turns.RemoveAll(x => _gridService.GetCell(x.Index).CellId != PlayerId.Empty); // for what?
-        
+
             return bannedTurns;
         }
 
-        private Vector2Int GetIndex(int index) => 
+        private Vector2Int GetIndex(int index) =>
             new Vector2Int(_gridService.Columns[index].LastElementIndex, index);
 
         private List<Turn> GetBannedTurns(Player.Player activePlayer)
@@ -166,14 +456,17 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
             {
                 if (_gridService.Columns[i].LastElementIndex <= 1)
                     continue;
-                
-                if (TurnNeedToBun(activePlayer, new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i), out Turn bannedTurn))
+
+                if (TurnNeedToBun(activePlayer, new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i),
+                        out Turn bannedTurn))
                     commands.Add(bannedTurn);
 
-                if (TurnNeedToBun(opponent, new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i), out bannedTurn))
+                if (TurnNeedToBun(opponent, new Vector2Int(_gridService.Columns[i].LastElementIndex - 1, i),
+                        out bannedTurn))
                     commands.Add(bannedTurn);
 
-                if (TurnNeedToBun(opponent, new Vector2Int(_gridService.Columns[i].LastElementIndex - 2, i), out bannedTurn))
+                if (TurnNeedToBun(opponent, new Vector2Int(_gridService.Columns[i].LastElementIndex - 2, i),
+                        out bannedTurn))
                     commands.Add(bannedTurn);
             }
 
@@ -194,6 +487,7 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
 
                 return true;
             }
+
             CancelSimulate(index);
 
             return false;
@@ -206,7 +500,7 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
 
             return GetTurns(playerId);
         }
-        
+
         private List<Turn> GetWonTurns(PlayerId playerId)
         {
             return GetTurns(playerId);
@@ -232,7 +526,7 @@ namespace Connect4.Scripts.Services.TurnCalculationsService
 
             return turns;
         }
-    
+
         private void SimulateTurn(Vector2Int index, PlayerId playerId)
         {
             _gridService.TakeCell(index.x, index.y, playerId);

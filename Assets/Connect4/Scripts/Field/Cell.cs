@@ -8,7 +8,7 @@ namespace Connect4.Scripts.Field
     {
         public Vector2Int Index { get; private set; }
         public Vector2 Position { get; private set; }
-        public PlayerId CellId { get; private set; } = PlayerId.Empty;
+        public PlayerId CellId { get; set; } = PlayerId.Empty;
 
         public void Initialize(Vector2Int index, Vector2 position, PlayerId cellId = PlayerId.Empty)
         {

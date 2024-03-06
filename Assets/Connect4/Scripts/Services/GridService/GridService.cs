@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Connect4.Scripts.Field;
@@ -8,6 +9,19 @@ namespace Connect4.Scripts.Services.GridService
     public class GridService : IGridService
     {
         public Cell[][] Grid { get; private set; }
+ 
+        public Cell[][] CloneGrid()
+        {
+            Cell[][] clone = new Cell[Grid.Length][];
+
+            for (int i = 0; i < Grid.Length; i++)
+            {
+                clone[i] = new Cell[Grid[i].Length];
+                Array.Copy(Grid[i], clone[i], Grid[i].Length);
+            }
+
+            return clone;
+        }
 
         public int Height => Grid.Length;
         public int Width => Grid[0].Length;
@@ -57,6 +71,7 @@ namespace Connect4.Scripts.Services.GridService
     public interface IGridService
     {
         Cell[][] Grid { get; }
+        Cell[][] CloneGrid();
         int Height { get; }
         int Width { get; }
         public List<Column> Columns { get; set; }
