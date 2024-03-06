@@ -8,12 +8,11 @@ namespace Connect4.Scripts.Infrastructure
     public class LoadingCurtain : MonoBehaviour, ILoadingCurtain
     {
         private const float Delay = 0.5f;
-    
+        public event Action OnComplete;
+        
         public Image Image;
         public float MoveUpSpeed = 20f;
         public float TimeStep = 0.03f;
-
-        public event Action OnComplete;
 
         private void Awake()
         {
