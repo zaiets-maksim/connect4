@@ -41,7 +41,7 @@ namespace Connect4.Scripts.Player
             _commandHistoryService = commandHistoryService;
         }
     
-        public bool IsHuman() => this is Human;
+        public abstract bool IsHuman();
 
         public abstract Task DoTurn(Vector2Int index);
 
@@ -68,6 +68,8 @@ namespace Connect4.Scripts.Player
 
     public class Human : Player
     {
+        public override bool IsHuman() => true;
+
         public override async Task DoTurn(Vector2Int index)
         {
             _gameCurator.ActivePlayer.IsReady = false;
@@ -85,6 +87,8 @@ namespace Connect4.Scripts.Player
 
     public class Computer : Player
     {
+        public override bool IsHuman() => false;
+        
         private Vector2Int _delay = new Vector2Int(100, 300);
     
         public override async Task DoTurn(Vector2Int index)
